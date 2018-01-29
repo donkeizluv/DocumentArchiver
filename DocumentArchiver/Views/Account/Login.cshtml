@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+<link rel="stylesheet" href="~/css/Account/Account.css"/>
+<div class="modal show modal-bg">
+    <div class="modal-dialog top-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Đăng nhập</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form action="DoLogin" role="form" method="post">
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Tên" name="userName" type="text">
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Mật khẩu" name="pwd" type="password" value="">
+                                </div>
+                                <p class="login-status text-center text-danger">@ViewBag.LoginStatus</p>
+                                <input class="btn btn-lg btn-primary btn-block" type="submit" value="Login">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
