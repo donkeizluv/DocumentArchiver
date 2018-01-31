@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using DocumentArchiver.EntityModels;
 using DocumentArchiver.Helper;
@@ -18,7 +19,6 @@ namespace DocumentArchiver.Controllers
 {
     public class AccountController : Controller
     {
-        public static readonly string LoginStatusKey = "LoginStatus";
         private DocumentArchiverContext _context;
         private IConfiguration _config;
 
@@ -64,13 +64,11 @@ namespace DocumentArchiver.Controllers
         public IActionResult Login()
         {
             HttpContext.Response.Headers.Add("Login", EnviromentHelper.LoginUrl.ToString());
+            //Redirects if already authenticated
             if (User.Identities.Any(u => u.IsAuthenticated))
             {
                 return RedirectToAction("Index", "Home");
             }
-            if (TempData.ContainsKey(LoginStatusKey))
-                ViewBag.LoginStatus = TempData[LoginStatusKey];
-            //return login form view
             ViewBag.NoFooter = true;
             return View();
         }
@@ -78,10 +76,9 @@ namespace DocumentArchiver.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DoLogin([FromForm]string userName = "", [FromForm]string pwd = "")
         {
+            Thread.Sleep(1500);
             using (_context)
             {
-                //remove this incase of recording user last login
-                _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                 //clear whatever stored session
                 ClearSession();
                 var loginLevel = GetLoginLevel(userName, pwd, _context, out var user);
@@ -114,24 +111,23 @@ namespace DocumentArchiver.Controllers
                         //IsPersistent = false,
                         //AllowRefresh = false
                     });
-                return RedirectToAction("Index", "Home");
+                //Save lastlogin
+                await _context.SaveChangesAsync();
+                return Ok(new { Valid = true, Message = string.Empty });
             }
         }
 
         private IActionResult LoginFail()
         {
-            TempData[LoginStatusKey] = "Đăng nhập thất bại."; //pass data to redirect
-            return RedirectToAction("Login", "Account");
+            return Ok(new { Valid = false, Message = "Đăng nhập thất bại." });
         }
         private IActionResult NoPermission()
         {
-            TempData[LoginStatusKey] = "Không tìm thấy quyền truy cập."; //pass data to redirect
-            return RedirectToAction("Login", "Account");
+            return Ok(new { Valid = false, Message = "Không tìm thấy quyền truy cập." });
         }
         private IActionResult NotActive()
         {
-            TempData[LoginStatusKey] = "Tài khoản đã bị vô hiệu hóa."; //pass data to redirect
-            return RedirectToAction("Login", "Account");
+            return Ok(new { Valid = false, Message = "Tài khoản đã bị vô hiệu hóa." });
         }
 
         [HttpGet]
@@ -175,6 +171,8 @@ namespace DocumentArchiver.Controllers
                 return LoginResult.NoPermission; //no permission
             if (!user.Active)
                 return LoginResult.NotActive;
+
+            user.LastLogin = DateTime.Today;
             return LoginResult.OK;
         }
     }

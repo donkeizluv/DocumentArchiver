@@ -12,6 +12,7 @@ namespace DocumentArchiver.EntityModels
         }
 
         public int ContractId { get; set; }
+        public string ContractNumber { get; set; }
         public string CustomerName { get; set; }
         public string IdentityCard { get; set; }
         public string Phone { get; set; }

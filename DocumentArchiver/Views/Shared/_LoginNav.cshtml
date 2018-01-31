@@ -1,18 +1,18 @@
-﻿<ul class="nav navbar-nav navbar-right">
+﻿<ul class="navbar-nav ml-auto">
     @using System.Security.Claims;
     @if (!User.Identities.Any(u => u.IsAuthenticated))
     {
-        <li><a asp-area="" asp-controller="Account" asp-action="Login">Login</a></li>
+        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Login</a></li>
     }
     else
     {
-        <li>
-            <a asp-area="" asp-controller="Account" asp-action="Info">
+        <li class="nav-item">
+            <div class="nav-link">
                 Xin chào!
                 @User.Identities.First(u => u.IsAuthenticated &&
-                                     u.HasClaim(c => c.Type == ClaimTypes.Name)).FindFirst(ClaimTypes.Name).Value
-            </a>
+                                  u.HasClaim(c => c.Type == ClaimTypes.Name)).FindFirst(ClaimTypes.Name).Value
+            </div>
         </li>
-        <li><a asp-area="" asp-controller="Account" asp-action="LogOut">Thoát</a></li>
+        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="LogOut">Thoát</a></li>
     }
 </ul>

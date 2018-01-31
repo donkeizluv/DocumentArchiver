@@ -3,51 +3,43 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] - Document Archiver</title>
     @*Promise support for IE*@
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
-    <environment include="Development">
-        <script src="~/js/lib/jquery/jquery.min.js"></script>
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-        <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
-        <script asp-src-include="~/dist/Shared_*.js"></script>
-    </environment>
-    @*prod*@
-    <environment exclude="Development">
-        <script src="~/js/lib/jquery/jquery.min.js"></script>
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-        <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
-        <script asp-src-include="~/dist/Shared_*.js"></script>
-    </environment>
+    <link rel="stylesheet" href="~/lib/fa/fontawesome-all.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/popper.js/dist/umd/popper.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script asp-src-include="~/dist/Shared_*.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
+    <nav class="navbar navbar-expand-md bg-dark navbar-dark">
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand"><span class="env">@EnviromentHelper.EnvStr</span> Document Archiver</a>
+        <!-- Toggler/collapsibe Button -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand"><span class="env">@EnviromentHelper.EnvStr</span> Document Archiver</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    @*<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>*@
-                    @*<li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                        <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>*@
-                </ul>
-                @Html.Partial("_LoginNav")
-            </div>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav">
+                @*<li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>*@
+            </ul>
+            @Html.Partial("_LoginNav")
         </div>
     </nav>
-
-    <div class="container-fluid top-buffer">
+    <div class="container">
         <div class="row">
-            <div class="col-lg-10 col-lg-offset-1">
+            <div class="col">
                 @RenderBody()
             </div>
         </div>
@@ -55,6 +47,7 @@
     @*toggle no footer*@
     @if (ViewBag.NoFooter != true)
     {
+        <hr />
         <div class="panel-footer text-center container-fluid">
             <span>HD SAISON - @DateTime.Now.Year</span>
         </div>

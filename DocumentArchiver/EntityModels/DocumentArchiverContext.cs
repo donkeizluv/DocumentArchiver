@@ -13,6 +13,14 @@ namespace DocumentArchiver.EntityModels
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAbility> UserAbility { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(@"Server=(Localdb)\local;Database=DocumentArchiver;Trusted_Connection=True;");
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Ability>(entity =>
@@ -28,6 +36,10 @@ namespace DocumentArchiver.EntityModels
 
             modelBuilder.Entity<Contract>(entity =>
             {
+                entity.Property(e => e.ContractNumber)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
                 entity.Property(e => e.CreateTime).HasColumnType("datetime");
 
                 entity.Property(e => e.CustomerName)
