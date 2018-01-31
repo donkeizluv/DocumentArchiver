@@ -9,27 +9,28 @@ using NLog;
 
 namespace DocumentArchiver.Controllers
 {
-    [Route("API/ItemListing/[action]")]
+    [Route("API/ContractListing/[action]")]
     [Authorize]
-    public class ItemListingController : Controller
+    public class ContractListingController : Controller
     {
         private static Logger _logger = LogManager.GetCurrentClassLogger();
         private DocumentArchiverContext _context;
         private IConfiguration _config;
 
-        public ItemListingController(DocumentArchiverContext context, IConfiguration config)
+        public ContractListingController(DocumentArchiverContext context, IConfiguration config)
         {
             _context = context;
             _config = config;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCaseListingModel([FromQuery]int page = 1, [FromQuery]string type = "", [FromQuery]string contain = "", [FromQuery]string order = "", [FromQuery]bool asc = true)
+        public async Task<IActionResult> Get([FromQuery]int page = 1, [FromQuery]string type = "", [FromQuery]string contain = "", [FromQuery]string order = "", [FromQuery]bool asc = true)
         {
             using (_context)
             {
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-                var model = await ModelFactory.CreateCaseListingModel(_context, page, type, contain, order, asc);
+                var factory = new ContractVMFactory(_context);
+                var model = await factory.Create(page, type, contain, order, asc);
                 return Ok(model);
             }
         }

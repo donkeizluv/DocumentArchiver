@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace DocumentArchiver.ViewModels
 {
-    public static class ModelFactory
+    public class ContractVMFactory
     {
         private static Logger _logger = LogManager.GetCurrentClassLogger();
-        public static async Task<CaseListingViewModel> CreateCaseListingModel(DocumentArchiverContext context, int page, string type, string contains, string orderBy, bool asc)
+
+        private DocumentArchiverContext _context;
+        public ContractVMFactory(DocumentArchiverContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<ContractViewModel> Create(int page, string type, string contains, string orderBy, bool asc)
         {
             string checkedOrder = orderBy;
             bool checkedAsc = asc;
@@ -19,22 +26,26 @@ namespace DocumentArchiver.ViewModels
                 checkedOrder = nameof(Contract.CreateTime);
                 checkedAsc = false;
             }
-            var query = GetFilteredContracts(context, page, type, contains, checkedOrder, checkedAsc, out var totalRows).Include(c => c.EventLog);
-            return new CaseListingViewModel
+            
+            var model = new ContractViewModel
             {
                 OnPage = page,
                 FilterBy = type,
                 FilterString = contains,
                 OrderBy = checkedOrder,
-                OrderAsc = checkedAsc,
-                Contracts = await query.ToListAsync(),
-                TotalRows = totalRows
+                OrderAsc = checkedAsc
             };
+
+            var query = GetFilteredContracts(page, model.ItemPerPage, type, contains, checkedOrder, checkedAsc, out var totalRows);
+            model.TotalRows = totalRows;
+            model.Items = await query.ToListAsync();
+            return model;
+
         }
-        private static IQueryable<Contract> GetFilteredContracts(DocumentArchiverContext context, int page, string type, string contains, string orderBy, bool asc, out int totalRows)
+        private IQueryable<Contract> GetFilteredContracts(int page, int take, string type, string contains, string orderBy, bool asc, out int totalRows)
         {
-            int excludedRows = (page - 1) * CaseListingViewModel.ItemPerPage;
-            var query = context.Contract.AsQueryable();
+            int excludedRows = (page - 1) * take;
+            var query = _context.Contract.AsQueryable();
             totalRows = query.Count();
             //Check if filter is applied
             if (!string.IsNullOrEmpty(type) && !string.IsNullOrEmpty(contains))
@@ -43,10 +54,10 @@ namespace DocumentArchiver.ViewModels
                 totalRows = query.Count();
             }
             var ordered = OrderTranslater(query, orderBy, asc);
-            return ordered.Skip(excludedRows).Take(CaseListingViewModel.ItemPerPage);
+            return ordered.Skip(excludedRows).Take(take);
         }
 
-        private static IOrderedQueryable<Contract> OrderTranslater(IQueryable<Contract> query, string order, bool asc)
+        private IOrderedQueryable<Contract> OrderTranslater(IQueryable<Contract> query, string order, bool asc)
         {
             var orderBy = order ?? string.Empty;
             switch (orderBy)
@@ -87,7 +98,7 @@ namespace DocumentArchiver.ViewModels
             }
         }
 
-        private static IQueryable<Contract> FilterTranslater(IQueryable<Contract> query, string filterBy, string filterText)
+        private IQueryable<Contract> FilterTranslater(IQueryable<Contract> query, string filterBy, string filterText)
         {
             switch (filterBy)
             {

@@ -76,7 +76,6 @@ namespace DocumentArchiver.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> DoLogin([FromForm]string userName = "", [FromForm]string pwd = "")
         {
-            Thread.Sleep(1500);
             using (_context)
             {
                 //clear whatever stored session

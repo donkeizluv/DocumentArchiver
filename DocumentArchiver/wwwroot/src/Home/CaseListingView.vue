@@ -1,7 +1,7 @@
 <template id="listing-template">
     <div>
         <div class="row top-margin">
-            <div class="col-6 mx-auto">
+            <div class="col-sm-8 mx-auto">
                 <search-bar v-bind:isdisabled="Loading"
                             v-on:submit="SearchButtonClicked"></search-bar>
             </div>
@@ -15,18 +15,18 @@
                                 <!--<td><button class="btn btn-link btn-group-sm" v-on:click="CollapseAll"><span class="glyphicon glyphicon-minus"></span> All</button></td>-->
                                 <!--<td><button class="btn btn-link" v-on:click="OrderByClicked('ContractId')" v-bind:disabled="Loading">
                                     <span v-html="DisplayOrderButtonStates('ContractId')"></span>#</button></td>-->
-                                <td><button class="btn btn-link" v-on:click="OrderByClicked('ContractNumber')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('ContractNumber')"></span>Số Hd.</button></td>
-                                <td><button class="btn btn-link" v-on:click="OrderByClicked('CustomerName')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('CustomerName')"></span>Tên Kh.</button></td>
-                                <td><button class="btn btn-link" v-on:click="OrderByClicked('IdentityCard')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('IdentityCard')"></span>CMND</button></td>
-                                <td><button class="btn btn-link" v-on:click="OrderByClicked('Phone')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('Phone')"></span>SĐT</button></td>
-                                <td><button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('CreateTime')"></span>Ngày tạo</button></td>
-                                <td><button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('Username')"></span>Người tạo</button></td>
+                                <th><button class="btn btn-link" v-on:click="OrderByClicked('ContractNumber')" v-bind:disabled="Loading">
+                                    <span v-html="OrderState('ContractNumber')"></span>Số Hd.</button></th>
+                                <th><button class="btn btn-link" v-on:click="OrderByClicked('CustomerName')" v-bind:disabled="Loading">
+                                    <span v-html="OrderState('CustomerName')"></span>Tên Kh.</button></th>
+                                <th><button class="btn btn-link" v-on:click="OrderByClicked('IdentityCard')" v-bind:disabled="Loading">
+                                    <span v-html="OrderState('IdentityCard')"></span>CMND</button></th>
+                                <th><button class="btn btn-link" v-on:click="OrderByClicked('Phone')" v-bind:disabled="Loading">
+                                    <span v-html="OrderState('Phone')"></span>SĐT</button></th>
+                                <th><button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="Loading">
+                                    <span v-html="OrderState('CreateTime')"></span>Ngày tạo</button></th>
+                                <th><button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="Loading">
+                                    <span v-html="OrderState('Username')"></span>Người tạo</button></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,7 +62,10 @@
                                 </tr>
                                 <!--@*expandable details*@-->
                                 <tr>
-                                    <event-details v-bind:events="item.EventLog" v-show="IsShowingEventDetails(item.ContractId)"></event-details>
+                                    <event-details 
+                                                   v-bind:id="item.ContractId" 
+                                                   v-show="IsShowingEventDetails(item.ContractId)"
+                                                   v-on:populatecompleted="ChildLoadCompleted()"></event-details>
                                     <!--<other-details v-bind:dealer="dealer" v-show="IsShowingOtherDetails(dealer.DealerId)"></other-details>
 
                                     <doc-details v-on:displayscannclicked="OpenNewScanPage"
@@ -107,6 +110,8 @@
     import API from '../Home/API'
     import searchBar from '../Home/SearchBar.vue'
     import eventDetails from '../Home/EventDetails.vue'
+    import pagenav from 'vuejs-paginate'
+
     //import InputModal from './InputModal.vue'
     //import DownPopup from './DownPopup.vue'
 
@@ -114,7 +119,7 @@
         name: 'CaseListingView',
         template: '#listing-template',
         components: {
-            'page-nav': require('vuejs-paginate'),
+            'page-nav': pagenav,
             'search-bar': searchBar,
             'event-details': eventDetails
         },
@@ -128,7 +133,7 @@
                 this.$data.FilterString = to.query.contain
                 this.$data.OrderBy = to.query.order;
                 this.$data.OrderAsc = to.query.asc
-                this.LoadRequests(this.GetCurrentItemsAPI);
+                this.LoadItems(this.GetCurrentItemsAPI);
             }
         },
         data: function () {
@@ -154,7 +159,7 @@
         computed: {
             //page = { page } & type={ type } & contain={contain }&order={ order }&asc={ asc }
             GetCurrentItemsAPI: function () {
-                var api = API.GetCaseListingURL;
+                var api = API.ContractListingURL;
                 var page = this.$data.OnPage;
                 if (page < 1 || page == null) page = 1;
                 api = api.replace("{page}", page);
@@ -186,10 +191,10 @@
                 this.$data.OnPage = model.OnPage;
                 this.$data.OrderBy = model.OrderBy;
                 this.$data.OrderAsc = model.OrderAsc;
-                this.$data.Items = model.Contracts;
+                this.$data.Items = model.Items;
                 this.UpdatePagination(model.TotalPages, model.TotalRows);
             },
-            LoadRequests: function (url) {
+            LoadItems: function (url) {
                 this.$data.Loading = true;
                 var that = this;
                 //that.$data.IsLoading = true; //way too fast to show loading animation, causes jerking in UI
@@ -203,7 +208,7 @@
                             window.location.href = response.headers.login;
                         }
                         //that.$data.RequestListingModel = response.data;
-                        that.$data.Items = response.data.Contracts;
+                        that.$data.Items = response.data.Items;
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
                         that.$data.Loading = false;
                     })
@@ -251,16 +256,23 @@
                 };
             },
             //Detail
+            ChildLoadCompleted: function () {
+                this.$data.Loading = false;
+            },
             IsShowingEventDetails: function (id) {
                 var index = this.$data.ShowingEventDetails.indexOf(id);
                 return index != -1;
             },
             ToggleEventDetails: function (id) {
+                if (this.$data.Loading) return;
                 var index = this.$data.ShowingEventDetails.indexOf(id);
                 if (index == -1) {
                     //shows
                     this.HideDetails(id);
                     this.$data.ShowingEventDetails.push(id);
+                    //Notify child to populate items
+                    this.$data.Loading = true;
+                    this.$emit("populateevents", id)
                 }
                 else {
                     //hides

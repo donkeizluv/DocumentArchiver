@@ -28,7 +28,8 @@ namespace DocumentArchiver.Controllers
             using (_context)
             {
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-                var model = await ModelFactory.CreateCaseListingModel(_context, page, type, contain, order, asc);
+                var factory = new ContractVMFactory(_context);
+                var model = await factory.Create(page, type, contain, order, asc);
                 return View(model);
             }
         }

@@ -1,19 +1,20 @@
-﻿using DocumentArchiver.EntityModels;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DocumentArchiver.ViewModels
 {
-    public class CaseListingViewModel
+    public abstract class ViewModelBase<T>
     {
-        public List<Contract> Contracts { get; set; }
-        public List<string> DocumentNames { get; set; }
+        public List<T> Items { get; set; }
         //For debug purposes
-        public int OnPage { get; set; }
-        public string FilterBy { get; set; }
-        public string FilterString { get; set; }
-        public string OrderBy { get; set; }
-        public bool OrderAsc { get; set; }
-        public static int ItemPerPage { get; set; } = 10;
+        public virtual int OnPage { get; set; }
+        public virtual string FilterBy { get; set; }
+        public virtual string FilterString { get; set; }
+        public virtual string OrderBy { get; set; }
+        public virtual bool OrderAsc { get; set; }
+        public abstract int ItemPerPage { get; }
 
         //update these every time add record
         public int TotalPages { get; private set; }
