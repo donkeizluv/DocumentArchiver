@@ -51,8 +51,8 @@
                                 <tr v-for="event in Items">
                                     <td class="top-border"><span>{{event.EventId}}</span></td>
                                     <td class="top-border"><span>{{event.Name}}</span></td>
-                                    <td class="top-border"><span>{{event.DateOfEvent}}</span></td>
-                                    <td class="top-border"><span>{{event.CreateTime}}</span></td>
+                                    <td class="top-border"><span>{{event.DateOfEventString}}</span></td>
+                                    <td class="top-border"><span>{{event.CreateTimeString}}</span></td>
                                     <td class="top-border"><span>{{event.Filetype}}</span></td>
                                     <td class="top-border"><span>{{event.Username}}</span></td>
                                     <td class="top-border"><div class="wrap-text">{{event.Note}}</div></td>
@@ -73,7 +73,7 @@
                                     :prev-link-class="'page-link'"
                                     :next-class="'page-item'"
                                     :next-link-class="'page-link'"
-                                    :container-class="'pagination pagination-sm justify-content-center'">
+                                    :container-class="'pagination pagination-sm no-bottom-margin justify-content-center'">
                         </page-nav>
                     </div>
                 </div>
@@ -85,6 +85,7 @@
     import API from '../Home/API'
     import axios from 'axios'
     import pagenav from 'vuejs-paginate'
+    import queryBuilder from 'query-string'
 
     export default {
         name: 'event-details',
@@ -113,14 +114,7 @@
                 return this.$data.TotalPages > 1;
             },
             GetCurrentItemsAPI: function () {
-                var api = API.EventListingURL;
-                var page = this.$data.OnPage;
-                if (page < 1 || page == null) page = 1;
-                api = api.replace("{id}", this.id);
-                api = api.replace("{page}", page);
-                api = api.replace("{order}", this.$data.OrderBy);
-                api = api.replace("{asc}", this.$data.OrderAsc);
-                return api;
+               return API.EventListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
             },
         },
         created: function () {
@@ -128,6 +122,14 @@
             this.$parent.$on('populateevents', this.Populate);
         },
         methods: {
+            ComposeCurrentItemsQuery: function (pageNumber) {
+                return {
+                    id: this.id,
+                    page: pageNumber,
+                    order: this.$data.OrderBy,
+                    asc: this.$data.OrderAsc,
+                };
+            },
             Populate: function (id) {
                 //Check if this component being clicked
                 if (id != this.id) return;
@@ -206,6 +208,9 @@
     }
     .top-border {
         border-top: 1px solid #dee2e6 !important;
+    }
+    .no-bottom-margin{
+        margin-bottom: 0;
     }
     .shadow-nohover {
         box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace DocumentArchiver.EntityModels
@@ -16,11 +17,15 @@ namespace DocumentArchiver.EntityModels
         public string CustomerName { get; set; }
         public string IdentityCard { get; set; }
         public string Phone { get; set; }
-        public DateTime CreateTime { get; set; }
         public string Username { get; set; }
 
+        [JsonIgnore]
+        public DateTime CreateTime { get; set; }
+        [JsonIgnore]
         public User UsernameNavigation { get; set; }
+        [JsonIgnore]
         public ICollection<ContractSharing> ContractSharing { get; set; }
+        [JsonIgnore]
         public ICollection<EventLog> EventLog { get; set; }
     }
 }

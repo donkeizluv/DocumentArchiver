@@ -20,23 +20,25 @@ namespace DocumentArchiver.ViewModels
         {
             string checkedOrder = orderBy;
             bool checkedAsc = asc;
+            int checkedPage = page;
             //Default order
             if(string.IsNullOrEmpty(orderBy))
             {
                 checkedOrder = nameof(Contract.CreateTime);
                 checkedAsc = false;
             }
-            
+            if (checkedPage < 1) checkedPage = 1;
+
             var model = new ContractViewModel
             {
-                OnPage = page,
+                OnPage = checkedPage,
                 FilterBy = type,
                 FilterString = contains,
                 OrderBy = checkedOrder,
                 OrderAsc = checkedAsc
             };
 
-            var query = GetFilteredContracts(page, model.ItemPerPage, type, contains, checkedOrder, checkedAsc, out var totalRows);
+            var query = GetFilteredContracts(checkedPage, model.ItemPerPage, type, contains, checkedOrder, checkedAsc, out var totalRows);
             model.TotalRows = totalRows;
             model.Items = await query.ToListAsync();
             return model;

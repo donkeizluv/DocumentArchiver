@@ -12,7 +12,8 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <!--<td><button class="btn btn-link btn-group-sm" v-on:click="CollapseAll"><span class="glyphicon glyphicon-minus"></span> All</button></td>-->
+                                <td><button class="btn btn-link" v-on:click="CollapseAll" v-bind:disabled="Loading">
+                                    <span class="fas fa-minus small-fa"></span> All</button></td>
                                 <!--<td><button class="btn btn-link" v-on:click="OrderByClicked('ContractId')" v-bind:disabled="Loading">
                                     <span v-html="DisplayOrderButtonStates('ContractId')"></span>#</button></td>-->
                                 <th><button class="btn btn-link" v-on:click="OrderByClicked('ContractNumber')" v-bind:disabled="Loading">
@@ -31,13 +32,13 @@
                         </thead>
                         <tbody>
                             <template v-for="item in Items">
-                                <tr v-on:click="ToggleEventDetails(item.ContractId)">
-                                    <!--<td>
-                                    <button v-on:click="TogglePosDetails(dealer.DealerId)" class="btn-xs btn-link">
-                                        <span class="glyphicon" v-bind:class="{'glyphicon-minus': IsShowingPosDetails(dealer.DealerId), 'glyphicon-plus': !IsShowingPosDetails(dealer.DealerId)}">
+                                <tr>
+                                    <td>
+                                    <button v-on:click="ToggleEventDetails(item.ContractId)" class="btn btn-sm btn-link" v-bind:disabled="Loading">
+                                        <span class="fas" v-bind:class="{'fa-minus': IsShowingEventDetails(item.ContractId), 'fa-plus': !IsShowingEventDetails(item.ContractId)}">
                                         </span>
                                     </button>
-                                </td>-->
+                                    </td>
                                     <!--<td>
                                         <span class="table-cell-content">{{item.ContractId}}</span>
                                     </td>-->
@@ -54,7 +55,7 @@
                                         <span class="table-cell-content">{{item.Phone}}</span>
                                     </td>
                                     <td>
-                                        <span class="table-cell-content">{{item.CreateTime}}</span>
+                                        <span class="table-cell-content">{{item.CreateTimeString}}</span>
                                     </td>
                                     <td>
                                         <span class="table-cell-content">{{item.Username}}</span>
@@ -111,6 +112,7 @@
     import searchBar from '../Home/SearchBar.vue'
     import eventDetails from '../Home/EventDetails.vue'
     import pagenav from 'vuejs-paginate'
+    import queryBuilder from 'query-string'
 
     //import InputModal from './InputModal.vue'
     //import DownPopup from './DownPopup.vue'
@@ -147,7 +149,7 @@
                 OrderAsc: true,
                 Loading: false,
 
-                Injected: null,
+                //Injected: null,
                 Items: [],
                 TotalRows: 0,
                 TotalPages: 0,
@@ -157,17 +159,8 @@
             };
         },
         computed: {
-            //page = { page } & type={ type } & contain={contain }&order={ order }&asc={ asc }
             GetCurrentItemsAPI: function () {
-                var api = API.ContractListingURL;
-                var page = this.$data.OnPage;
-                if (page < 1 || page == null) page = 1;
-                api = api.replace("{page}", page);
-                api = api.replace("{type}", this.$data.FilterBy);
-                api = api.replace("{contain}", this.$data.FilterString);
-                api = api.replace("{order}", this.$data.OrderBy);
-                api = api.replace("{asc}", this.$data.OrderAsc);
-                return api;
+                return API.ContractListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
             },
             //CanExport: function () {
             //    return common.arrayContains(this.$data.Ability, "ExportRequests");
@@ -185,7 +178,7 @@
                    //Show app init failed
                     return;
                 }
-                this.$data.Injected = model;
+                //this.$data.Injected = model;
                 this.$data.FilterBy = model.FilterBy;
                 this.$data.FilterString = model.FilterString;
                 this.$data.OnPage = model.OnPage;
@@ -270,8 +263,8 @@
                     //shows
                     this.HideDetails(id);
                     this.$data.ShowingEventDetails.push(id);
-                    //Notify child to populate items
                     this.$data.Loading = true;
+                    //Broadcast events
                     this.$emit("populateevents", id)
                 }
                 else {
@@ -286,6 +279,9 @@
                 if (index != -1) {
                     this.$data.ShowingEventDetails.splice(index, 1);
                 }
+            },
+            CollapseAll: function () {
+                while (this.$data.ShowingEventDetails.length > 0) { this.$data.ShowingEventDetails.pop(); }
             },
             //order methods
             OrderByClicked: function (orderBy) {
@@ -315,6 +311,9 @@
     };
 </script>
 <style scoped>
+    .small-fa {
+        font-size: .875rem;
+    }
     .top-margin{
         margin-top: 15px;
     }
