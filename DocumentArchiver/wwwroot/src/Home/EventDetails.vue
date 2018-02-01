@@ -7,56 +7,109 @@
                         <div class="table-responsive">
                             <table class="table table-sm borderless">
                                 <thead>
-                                    <tr class="text-danger">
-                                        <th>
+                                    <tr>
+                                        <td>
                                             <button class="btn btn-link" v-on:click="OrderByClicked('EventId')" v-bind:disabled="Loading">
                                                 <span v-html="OrderState('EventId')"></span>#
                                             </button>
-                                        </th>
-                                        <th>
+                                        </td>
+                                        <td>
                                             <button class="btn btn-link" v-on:click="OrderByClicked('Name')" v-bind:disabled="Loading">
                                                 <span v-html="OrderState('Name')"></span>Sự kiện
                                             </button>
-                                        </th>
-                                        <th>
+                                        </td>
+                                        <td>
                                             <button class="btn btn-link" v-on:click="OrderByClicked('DateOfEvent')" v-bind:disabled="Loading">
                                                 <span v-html="OrderState('DateOfEvent')"></span>Ngày sự kiện
                                             </button>
-                                        </th>
-                                        <th>
+                                        </td>
+                                        <td>
                                             <button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="Loading">
                                                 <span v-html="OrderState('CreateTime')"></span>Ngày tạo
                                             </button>
-                                        </th>
-                                        <th>
+                                        </td>
+                                        <td>
                                             <button class="btn btn-link" v-on:click="OrderByClicked('Filetype')" v-bind:disabled="Loading">
                                                 <span v-html="OrderState('Filetype')"></span>Loại file
                                             </button>
-                                        </th>
-                                        <th>
+                                        </td>
+                                        <td>
                                             <button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="Loading">
                                                 <span v-html="OrderState('Username')"></span>Người đăng
                                             </button>
-                                        </th>
-                                        <th>
+                                        </td>
+                                        <td>
                                             Ghi chú
-                                        </th>
-                                        <!--<td>
-                                            <button class="btn btn-sm">
-                                                <span class="fa fa-plus"></span>
-                                            </button>
-                                        </td>-->
+                                        </td>
+                                        <td>
+                                            Chỉnh sửa
+                                        </td>
                                     </tr>
                                 </thead>
                                 <tr v-for="event in Items">
                                     <td class="top-border"><span>{{event.EventId}}</span></td>
-                                    <td class="top-border"><span>{{event.Name}}</span></td>
-                                    <td class="top-border"><span>{{event.DateOfEventString}}</span></td>
+                                    <!--<td class="top-border"><span>{{event.Name}}</span></td>-->
+                                    <template v-if="IsEditMode(event.EventId)">
+                                        <td class="top-border">
+                                            <input type="text" class="form-control" v-model="event.Name" />
+                                        </td>
+                                    </template>
+                                    <template v-else>
+                                        <td class="top-border">
+                                            <span>{{event.Name}}</span>
+                                        </td>
+                                    </template>
+                                    <!--<td class="top-border"><span>{{event.DateOfEventString}}</span></td>-->
+                                    <template v-if="IsEditMode(event.EventId)">
+                                        <td class="top-border">
+                                            <input type="date" class="form-control" v-model="event.DateOfEventJS" />
+                                        </td>
+                                    </template>
+                                    <template v-else>
+                                        <td class="top-border">
+                                            <span>{{event.DateOfEventString}}</span>
+                                        </td>
+                                    </template>
                                     <td class="top-border"><span>{{event.CreateTimeString}}</span></td>
                                     <td class="top-border"><span>{{event.Filetype}}</span></td>
                                     <td class="top-border"><span>{{event.Username}}</span></td>
-                                    <td class="top-border"><div class="wrap-text">{{event.Note}}</div></td>
-                                    <!--<td><button class="btn-link"><span class="fa fa-pencil-square-o"></span></button></td>-->
+                                    <!--<td class="top-border"><div class="wrap-text">{{event.Note}}</div></td>-->
+                                    <template v-if="IsEditMode(event.EventId)">
+                                        <td class="top-border">
+                                            <input type="text" class="form-control" v-model="event.Note" />
+                                        </td>
+                                    </template>
+                                    <template v-else>
+                                        <td class="top-border">
+                                            <span>{{event.Note}}</span>
+                                        </td>
+                                    </template>
+                                    <td class="top-border">
+                                        <template v-if="IsEditMode(event.EventId)">
+                                            <!--Clear changes button-->
+                                            <button class="btn btn-outline-warning"
+                                                    v-on:click="ExitEditMode(event.EventId)">
+                                                <span class="fas fa-times"></span>
+                                            </button>
+                                        </template>
+                                        <template v-else>
+                                            <!--Enter edit-->
+                                            <button class="btn btn-outline-primary"
+                                                    v-on:click="EnterEditMode(event.EventId)">
+                                                <span class="fas fa-edit"></span>
+                                            </button>
+                                        </template>
+                                        <!--Delete-->
+                                        <button v-bind:disabled="IsEditMode(event.EventId)"
+                                                v-bind:class="{'btn btn-outline-secondary': IsEditMode(event.EventId), 'btn btn-outline-danger': !IsEditMode(event.EventId)}">
+                                            <span class="fas fa-trash-alt"></span>
+                                        </button>
+                                        <!--Save changes-->
+                                        <button v-bind:class="{'btn btn-outline-success': IsEditMode(event.EventId), 'btn btn-outline-secondary': !IsEditMode(event.EventId)}"
+                                                v-bind:disabled="!IsEditMode(event.EventId)">
+                                            <span class="fas fa-save"></span>
+                                        </button>
+                                    </td>
                                 </tr>
                             </table>
                         </div>
@@ -104,8 +157,9 @@
                 OrderAsc: true,
 
                 Items: [],
+                ItemsCopy: [],
                 TotalRows: 0,
-                TotalPages: 0,
+                TotalPages: 0
             };
         },
         computed: {
@@ -152,6 +206,7 @@
                             window.location.href = response.headers.login;
                         }
                         that.$data.Items = response.data.Items;
+                        that.RefreshCopy(); //Clone Items to arr
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
                         that.$data.Loading = false;
                         that.$data.Populated = true;
@@ -161,6 +216,48 @@
                         console.log(error);
                         //Pop up error
                     });
+            },
+            RefreshCopy: function () {
+                var i = this.$data.Items.length;
+                while (i--) this.$data.ItemsCopy[i] = JSON.parse(JSON.stringify(this.$data.Items[i]));
+            },
+            ExitEditMode: function (id) {
+                var index = this.FindItemIndex(id);
+                if (index == -1) {
+                    console.log('RevertItem: Cant find ' + id);
+                    return;
+                }
+                var clone = JSON.parse(JSON.stringify(this.$data.ItemsCopy[index]));
+                console.log(clone);
+                this.$data.Items[index] = clone;
+                this.$forceUpdate();
+            },
+            //Values changed tracking
+            //Edit mode
+            EnterEditMode: function (id) {
+                var index = this.FindItemIndex(id);
+                if (index == -1) {
+                    console.log('EnterEditMode: Cant find ' + id);
+                    return;
+                }
+                //Mark item as edit
+                this.$data.Items[index].EditMode = true;
+                //Re-render
+                this.$forceUpdate();
+            },
+            IsEditMode: function (id) {
+                var index = this.FindItemIndex(id);
+                if (index == -1) {
+                    console.log('IsEditMode: Cant find ' + id);
+                    return;
+                }
+                if (this.$data.Items[index].EditMode) {
+                    return true;
+                }
+                return false;
+            },
+            FindItemIndex: function (id) {
+                return this.$data.Items.findIndex(x => x.EventId == id);
             },
             //order methods
             OrderByClicked: function (orderBy) {

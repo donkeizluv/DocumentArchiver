@@ -15,6 +15,13 @@ namespace DocumentArchiver.EntityModels
                 return DateOfEvent.ToString(Const.StandardDate);
             }
         }
+        public string DateOfEventJS
+        {
+            get
+            {
+                return DateOfEvent.ToString(Const.JavascriptDate);
+            }
+        }
         public string CreateTimeString
         {
             get

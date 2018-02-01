@@ -8,5 +8,6 @@ namespace DocumentArchiver.Helper
     public static class Const
     {
         public static string StandardDate = "dd/MM/yyyy";
+        public static string JavascriptDate = "yyyy-MM-dd";
     }
 }
