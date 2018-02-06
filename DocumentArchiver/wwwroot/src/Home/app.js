@@ -1,8 +1,10 @@
 ﻿import Vue from 'vue'
 import VueRouter from 'vue-router'
 import CaseListingView from './CaseListingView.vue'
-//import VModal from 'vue-js-modal'
-//innit router
+import VModal from 'vue-js-modal'
+import Toasted from 'vue-toasted';
+
+//Init router
 var router = new VueRouter({
     mode: 'history',
     base: 'Home',
@@ -12,9 +14,16 @@ var router = new VueRouter({
         { name: 'Index', path: '/Index', component: CaseListingView }
     ]
 });
-
-//Vue.use(VModal);
+//Extend & reg
+Vue.use(VModal, { dialog: true });
 Vue.use(VueRouter);
+Vue.use(Toasted,
+    {
+        duration: 3333,
+        position: 'top-center',
+        theme: 'primary',
+        iconPack: 'fontawesome'});
+//Init
 new Vue({
     el: '#app',
     router: router,

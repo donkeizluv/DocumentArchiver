@@ -13,14 +13,6 @@ namespace DocumentArchiver.EntityModels
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAbility> UserAbility { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(@"Server=(Localdb)\local;Database=DocumentArchiver;Trusted_Connection=True;");
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Ability>(entity =>
@@ -97,6 +89,10 @@ namespace DocumentArchiver.EntityModels
                 entity.Property(e => e.Filetype)
                     .IsRequired()
                     .HasMaxLength(20);
+
+                entity.Property(e => e.Guid)
+                    .IsRequired()
+                    .HasMaxLength(36);
 
                 entity.Property(e => e.Name)
                     .IsRequired()

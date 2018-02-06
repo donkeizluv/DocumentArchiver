@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using DocumentArchiver.EntityModels;
 using DocumentArchiver.Helper;
+using DocumentArchiver.Indus;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,7 +38,8 @@ namespace DocumentArchiver
             //Inject config
             services.AddSingleton<IConfiguration>(Configuration);
 
-            //services.AddSingleton<ICustomerAdapter>(IndusFactory.GetMockInstance());
+            services.AddSingleton<IIndusAdapter>(IndusFactory.GetIndusInstance(Configuration,
+                File.ReadAllText($"{Program.ExeDir}\\{Configuration.GetSection("Indus").GetValue<string>("QueryFileName")}")));
 
             //auth service
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -116,9 +119,9 @@ namespace DocumentArchiver
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}");
-                //routes.MapRoute(
-                //   name: "api",
-                //   template: "api/{controller}/{action}");
+                routes.MapRoute(
+                   name: "api",
+                   template: "API/{controller}/{action}");
             });
         }
 

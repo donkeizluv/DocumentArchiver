@@ -14,7 +14,10 @@ namespace DocumentArchiver.EntityModels
         public string Note { get; set; }
         [JsonIgnore]
         public string Filename { get; set; }
+        [JsonIgnore]
+        public string Guid { get; set; }
         public string Filetype { get; set; }
+        [JsonIgnore]
         public int ContractId { get; set; }
         public string Username { get; set; }
 

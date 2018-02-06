@@ -1,5 +1,10 @@
 <template id="listing-template">
     <div>
+        <!--Modals-->
+        <!--<modal name="m-app-error" v-bind:clickToClose=false>
+        </modal>-->
+        <v-dialog :clickToClose=false />
+        <!--End modals-->
         <div class="row top-margin">
             <div class="col-sm-8 mx-auto">
                 <search-bar v-bind:isdisabled="Loading"
@@ -12,36 +17,56 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <td><button class="btn btn-link" v-on:click="CollapseAll" v-bind:disabled="Loading">
-                                    <span class="fas fa-minus small-fa"></span> All</button></td>
-                                <!--<td><button class="btn btn-link" v-on:click="OrderByClicked('ContractId')" v-bind:disabled="Loading">
-                                    <span v-html="DisplayOrderButtonStates('ContractId')"></span>#</button></td>-->
-                                <th><button class="btn btn-link" v-on:click="OrderByClicked('ContractNumber')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('ContractNumber')"></span>Số Hd.</button></th>
-                                <th><button class="btn btn-link" v-on:click="OrderByClicked('CustomerName')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('CustomerName')"></span>Tên Kh.</button></th>
-                                <th><button class="btn btn-link" v-on:click="OrderByClicked('IdentityCard')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('IdentityCard')"></span>CMND</button></th>
-                                <th><button class="btn btn-link" v-on:click="OrderByClicked('Phone')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('Phone')"></span>SĐT</button></th>
-                                <th><button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('CreateTime')"></span>Ngày tạo</button></th>
-                                <th><button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="Loading">
-                                    <span v-html="OrderState('Username')"></span>Người tạo</button></th>
+                                <th>
+                                    <button class="btn btn-link" v-on:click="CollapseAll" v-bind:disabled="Loading">
+                                        <span class="fas fa-minus fa-sm"></span> All
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('ContractNumber')" v-bind:disabled="Loading">
+                                        <span v-html="OrderState('ContractNumber')"></span>Số Hd.
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('CustomerName')" v-bind:disabled="Loading">
+                                        <span v-html="OrderState('CustomerName')"></span>Tên Kh.
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('IdentityCard')" v-bind:disabled="Loading">
+                                        <span v-html="OrderState('IdentityCard')"></span>CMND
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('Phone')" v-bind:disabled="Loading">
+                                        <span v-html="OrderState('Phone')"></span>SĐT
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="Loading">
+                                        <span v-html="OrderState('CreateTime')"></span>Ngày tạo
+                                    </button>
+                                </th>
+                                <th>
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="Loading">
+                                        <span v-html="OrderState('Username')"></span>Người tạo
+                                    </button>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <template v-for="item in Items">
                                 <tr>
                                     <td>
-                                    <button v-on:click="ToggleEventDetails(item.ContractId)" class="btn btn-sm btn-link" v-bind:disabled="Loading">
-                                        <span class="fas" v-bind:class="{'fa-minus': IsShowingEventDetails(item.ContractId), 'fa-plus': !IsShowingEventDetails(item.ContractId)}">
-                                        </span>
-                                    </button>
+                                        <button v-on:click="ToggleEventDetails(item.ContractId)" class="btn btn-sm btn-link" v-bind:disabled="Loading">
+                                            <span class="fas" v-bind:class="{'fa-minus': IsShowingEventDetails(item.ContractId),
+                                                  'fa-plus': !IsShowingEventDetails(item.ContractId)}">
+                                            </span>
+                                        </button>
                                     </td>
                                     <!--<td>
-                                        <span class="table-cell-content">{{item.ContractId}}</span>
-                                    </td>-->
+                                    <span class="table-cell-content">{{item.ContractId}}</span>
+                                </td>-->
                                     <td>
                                         <span class="table-cell-content">{{item.ContractNumber}}</span>
                                     </td>
@@ -63,23 +88,87 @@
                                 </tr>
                                 <!--@*expandable details*@-->
                                 <tr>
-                                    <event-details 
-                                                   v-bind:id="item.ContractId" 
+                                    <!--colspan 9999 will break Edge-->
+                                    <event-details :key="item.ContractId"
+                                                   v-bind:id="item.ContractId"
+                                                   v-bind:spancol=7
                                                    v-show="IsShowingEventDetails(item.ContractId)"
-                                                   v-on:populatecompleted="ChildLoadCompleted()"></event-details>
+                                                   v-on:populatecompleted="DetailsLoadCompleted"
+                                                   v-on:exception="ShowErrorDialog"
+                                                   v-on:success="ShowSuccessToast"/>
                                     <!--<other-details v-bind:dealer="dealer" v-show="IsShowingOtherDetails(dealer.DealerId)"></other-details>
 
-                                    <doc-details v-on:displayscannclicked="OpenNewScanPage"
-                                                 v-on:showuploadmodalclicked="ShowUploadModalHandler"
-                                                 v-bind:documentnames="DocumentNames"
-                                                 v-bind:uploaded="dealer.Scan"
-                                                 v-bind:dealerid="dealer.DealerId"
-                                                 v-show="IsShowingDocDetails(dealer.DealerId)"
-                                                 v-bind:readonly=readonly
-                                                 v-on:showprintdocclicked="PrinDocumentModalHandler"></doc-details>
-                                    @*any better ways to do this?*@-->
+                                <doc-details v-on:displayscannclicked="OpenNewScanPage"
+                                             v-on:showuploadmodalclicked="ShowUploadModalHandler"
+                                             v-bind:documentnames="DocumentNames"
+                                             v-bind:uploaded="dealer.Scan"
+                                             v-bind:dealerid="dealer.DealerId"
+                                             v-show="IsShowingDocDetails(dealer.DealerId)"
+                                             v-bind:readonly=readonly
+                                             v-on:showprintdocclicked="PrinDocumentModalHandler"></doc-details>
+                                @*any better ways to do this?*@-->
                                 </tr>
                             </template>
+                            <!--New case-->
+                            <tr>
+                                <td><span class="text-primary form-text">*</span></td>
+                                <!--Contract number-->
+                                <td>
+                                    <div class="input-group">
+                                        <input class="form-control form-control-sm" 
+                                               type="search"
+                                               v-model="NewItem.ContractNumber"
+                                               maxlength="20">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-link" 
+                                                    v-on:click="CheckContract"
+                                                    v-bind:disabled="!CanCheck">
+                                                <span class="fas fa-check"></span>Check
+                                            </button>
+                                        </span>
+                                    </div>
+                                </td>
+                                <!--Cus name-->
+                                <td>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           readonly
+                                           v-model="NewItem.CustomerName"/>
+                                </td>
+                                <!--Id card-->
+                                <td>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           readonly
+                                           v-model="NewItem.IdentityCard"/>
+                                </td>
+                                <!--Phone-->
+                                <td>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           readonly
+                                           v-model="NewItem.Phone"/>
+                                </td>
+                                <!--Operations buttons-->
+                                <td colspan="2">
+                                    <div class="clearfix">
+                                        <button class="btn btn-sm float-left"
+                                                v-bind:class="{'btn-success' : IsNewCaseValid,
+                                                'btn-secondary' : !IsNewCaseValid}"
+                                                v-bind:disabled="!IsNewCaseValid"
+                                                v-on:click="PostNewItem">
+                                            OK
+                                        </button>
+                                    </div>
+                                    
+                                    <!--<div class="d-inline-flex">
+                                        <button class="btn btn-sm btn-outline-danger ml-2"
+                                                v-on:click="ClearNewItem">
+                                            <span class="fas fa-times"></span>
+                                        </button>
+                                    </div>-->
+                                </td>                                
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -99,7 +188,7 @@
                           :prev-link-class="'page-link'"
                           :next-class="'page-item'"
                           :next-link-class="'page-link'"
-                          :container-class="'pagination justify-content-center'">
+                          :container-class="'pagination pagination-sm justify-content-center'">
                 </page-nav>
             </div>
         </div>
@@ -113,6 +202,8 @@
     import eventDetails from '../Home/EventDetails.vue'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
+
+    const errorModal = 'm-app-error';
 
     //import InputModal from './InputModal.vue'
     //import DownPopup from './DownPopup.vue'
@@ -136,7 +227,14 @@
                 this.$data.OrderBy = to.query.order;
                 this.$data.OrderAsc = to.query.asc
                 this.LoadItems(this.GetCurrentItemsAPI);
-            }
+            },
+            '$data.NewItem.ContractNumber'(to, from) {
+                //Clear values when ContractNumber changes
+                this.$data.NewItem.CustomerName = null;
+                this.$data.NewItem.Phone = null;
+                this.$data.NewItem.IdentityCard = null;
+                this.$data.IsNewCaseValid = false;
+            },
         },
         data: function () {
             return {
@@ -156,12 +254,32 @@
 
                 //Details
                 ShowingEventDetails: [],
+
+                //Crud
+                IsNewCaseValid: false,
+                NewItem: {
+                    ContractNumber: null,
+                    CustomerName: null,
+                    IdentityCard: null,
+                    Phone: null
+                }
             };
         },
         computed: {
             GetCurrentItemsAPI: function () {
                 return API.ContractListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
             },
+            CanSaveNewItem: function () {
+                return this.$data.IsNewCaseValid;
+            },
+            CanCheck: function () {
+                var format = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+                if (this.$data.NewItem.ContractNumber) {
+                    if (!format.test(this.$data.NewItem.ContractNumber))
+                        return true;
+                }
+                return false;
+            }
             //CanExport: function () {
             //    return common.arrayContains(this.$data.Ability, "ExportRequests");
             //},
@@ -204,16 +322,38 @@
                         that.$data.Items = response.data.Items;
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
                         that.$data.Loading = false;
+                        that.$data.ShowingEventDetails = []; //Reset shown details
+                        //Re-render
+                        //that.$forceUpdate();
                     })
                     .catch(function (error) {
                         console.log(error);
-                        //Pop up error
-                        //that.$data.StatusMessage = "Load dữ liệu request không thành công. Code: " + error.response.status;
-                        //that.$data.StatusTextClass = "status-danger";
-                        //console.log("Failed to fetch model"); //display this somehow...
+                        that.ShowErrorDialog('Không tải được danh sách!');
                     });
             },
-
+            ShowSuccessToast(mess) {
+                //This has shitty support for specific icon & multiple style class
+                this.$toasted.success(mess, {
+                    icon: 'fa-check-circle',
+                    className: 'toast-font-size'});
+            },
+            ShowInfoToast(mess) {
+                this.$toasted.info(mess, {
+                    icon: 'fa-exclamation-circle',
+                    className: 'toast-font-size'
+                });
+            },
+            ShowErrorDialog(mess) {
+                this.$modal.show('dialog', {  
+                    title: 'Lỗi :(',
+                    text: mess,
+                    buttons: [
+                        {
+                            title: 'Đóng',
+                            handler: () => { this.$modal.hide('dialog') }
+                        }
+                    ]});
+            },
             //update paging
             UpdatePagination: function (totalPages, totalRows) {
                 this.$data.TotalPages = totalPages;
@@ -226,7 +366,6 @@
                 this.$data.Loading = true;
                 this.$data.OnPage = page;
                 this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(page) });
-
             },
             //Search button click handler
             SearchButtonClicked: function (searchModel) {
@@ -248,13 +387,84 @@
                     asc: this.$data.OrderAsc,
                 };
             },
+            //CRUD
+            ClearNewItem: function () {
+                this.$data.NewItem.ContractNumber = null;
+                this.$data.NewItem.CustomerName = null;
+                this.$data.NewItem.Phone = null;
+                this.$data.NewItem.IdentityCard = null;
+                this.$data.IsNewCaseValid = false;
+            },
+            //Check before submit new item
+            CheckContract: function () {
+                var url = API.CheckContractAPI;
+                var that = this;
+                var formData = new FormData();
+                formData.append('contractNumber', this.$data.NewItem.ContractNumber);
+                //console.log(formData);
+
+                axios.post(url, formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.headers.login) {
+                            //Login expired -> Redirect
+                            window.location.href = response.headers.login;
+                            return;
+                        }
+                        if (response.data.Valid) {
+                            //Check OK
+                            that.ShowSuccessToast('Số hợp đồng hợp lệ');
+                            that.$data.IsNewCaseValid = true;
+                            that.$data.NewItem = response.data.Data;
+                        }
+                        else {
+                            //Not OK
+                            that.ShowInfoToast(response.data.Message);
+                        }
+                    })
+                    .catch(function (error) { //Not 2xx code
+                        that.ShowErrorDialog('Lỗi hệ thống. Vui lòng thử lại sau');
+                    });
+            },
+            //Call api to create new item
+            PostNewItem: function () {
+                var url = API.CreateContractAPI;
+                var that = this;
+                var formData = new FormData();
+                formData.append('contractNumber', this.$data.NewItem.ContractNumber);
+                //console.log(formData);
+
+                axios.post(url, formData)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.headers.login) {
+                            //Login expired -> Redirect
+                            window.location.href = response.headers.login;
+                            return;
+                        }
+                        if (response.data.Valid) {
+                            that.ShowSuccessToast('Tạo case thành công.');
+                            that.ClearNewItem();
+                            that.Refresh();
+                        }
+                        else {
+                            that.ShowInfoToast(response.data.Message);
+                        }
+                    })
+                    .catch(function (error) {
+                        that.ShowErrorDialog('Lỗi hệ thống. Vui lòng thử lại sau');
+                    });
+            },
             //Detail
-            ChildLoadCompleted: function () {
+            DetailsLoadCompleted: function () {
                 this.$data.Loading = false;
             },
             IsShowingEventDetails: function (id) {
                 var index = this.$data.ShowingEventDetails.indexOf(id);
-                return index != -1;
+                if (index != -1) {
+                    return true;
+                }
+                return false;
             },
             ToggleEventDetails: function (id) {
                 if (this.$data.Loading) return;
@@ -265,7 +475,7 @@
                     this.$data.ShowingEventDetails.push(id);
                     this.$data.Loading = true;
                     //Broadcast events
-                    this.$emit("populateevents", id)
+                    this.$emit("populatedetails", id);
                 }
                 else {
                     //hides
@@ -306,14 +516,14 @@
                     return '&dtrif;';
                 }
                 return '';
+            },
+            Refresh: function () {
+                this.LoadItems(this.GetCurrentItemsAPI);
             }
         }
     };
 </script>
 <style scoped>
-    .small-fa {
-        font-size: .875rem;
-    }
     .top-margin{
         margin-top: 15px;
     }

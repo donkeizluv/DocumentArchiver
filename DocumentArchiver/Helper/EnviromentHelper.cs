@@ -8,10 +8,10 @@ namespace DocumentArchiver.Helper
     {
         public static string EnvStr = string.Empty;
         public static string ConnectionStringKey = "DbConnectionString";
-        public static string GetCurrentAssemblyPath(string concat)
-        {
-            return $"{Program.ExeDir}{concat}";
-        }
+        //public static string GetCurrentAssemblyPath(string concat)
+        //{
+        //    return $"{Program.ExeDir}{concat}";
+        //}
 
         public static void LogException(Exception ex, Logger logger)
         {

@@ -10,20 +10,20 @@
                 <h3 class="mb-0">Đăng nhập</h3>
             </div>
             <div class="modal-body">
-                <form role="form">
+                <div class="form-group">
                     <div class="form-group">
                         <label>Tên</label>
-                        <input class="form-control" id="userName" type="text" required>
+                        <input class="form-control" id="userName" type="text" value="admin" required>
                     </div>
                     <div class="form-group">
                         <label>Mật khẩu</label>
-                        <input class="form-control" id="pwd" type="password" value="" required>
+                        <input class="form-control" id="pwd" type="password" value="bla" required>
                     </div>
                     <p id="status" class="text-center text-danger" style="height: 15px;">@ViewBag.LoginStatus</p>
                     <button id="buttonLogin" class="btn btn-primary btn-lg float-right" style="width: 20%">
                         <span id="buttonText">Login</span>
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -92,7 +92,7 @@
                 }
             });
         function ButtonLoading() {
-            $('#buttonText').text('').addClass('fas fa-spinner fa-spin');
+            $('#buttonText').text('').addClass('fas fa-spinner fa-pulse');
         }
         function ButtonNormal() {
             $('#buttonText').text('Login').removeClass();

@@ -33,12 +33,11 @@ module.exports = {
         ]
     },
     plugins: [
-        //Very slow
-        //new webpack.optimize.UglifyJsPlugin({
-        //    output: {
-        //        comments: false //No comments
-        //    }
-        //}),
+        new webpack.optimize.UglifyJsPlugin({
+            output: {
+                comments: false //No comments
+            }
+        }),
         new CleanWebpackPlugin(['wwwroot/dist'], []),
         new HardSourceWebpackPlugin()
     ]

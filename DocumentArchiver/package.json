@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "webpack --hide-modules",
-    "build-min": "webpack -p --hide-modules"
+    "build-min": "webpack -p --config ./webpack.prod.config.js --hide-modules"
   },
   "dependencies": {
     "axios": "^0.17.1",
@@ -11,24 +11,26 @@
     "jquery": "3.3.1",
     "jquery-validation": "1.17.0",
     "jquery-validation-unobtrusive": "3.2.6",
+    "moment": "^2.20.1",
     "popper.js": "^1.13.0",
-    "query-string": "^5.0.1",
+    "query-string": "^5.1.0",
     "vee-validate": "^2.0.3",
     "vue": "^2.5.13",
-    "vue-js-modal": "^1.3.9",
-    "vue-loader": "^13.7.0",
+    "vue-js-modal": "^1.3.8",
     "vue-router": "^3.0.1",
-    "vue-strap": "^1.1.40",
-    "vue-template-compiler": "^2.5.13",
+    "vue-toasted": "^1.1.24",
     "vuejs-paginate": "^1.6.0"
   },
   "devDependencies": {
+    "vue-loader": "^14.1.1",
+    "hard-source-webpack-plugin": "^0.5.16",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-es2015": "^6.24.1",
-    "clean-webpack-plugin": "^0.1.18",
+    "clean-webpack-plugin": "^0.1.17",
     "css-loader": "^0.28.9",
     "style-loader": "^0.20.1",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "vue-template-compiler": "^2.5.13"
   }
 }

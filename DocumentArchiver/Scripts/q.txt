@@ -1,0 +1,50 @@
+SELECT
+tawd.szloanapplnno "ContractNumber"
+,tawd.szlname || ' ' || tawd.szmname || ' ' || tawd.szfname "CustomerName"
+,tawd.szssn "IdentityCard"
+,rs_addr.mobile "Phone"
+
+FROM       
+  tr_applicationworkdetails@GLM_LOS tawd
+  ,(SELECT OAD.SZADDRESS1 || ',' ||
+               NVL2(TRIM(OAD.SZLANDMARK), TRIM(OAD.SZLANDMARK) || ',', '') ||
+               NVL2(TRIM(OAD.SZSHORTADDRESS2),
+                    TRIM(OAD.SZSHORTADDRESS2) || ',',
+                    '') ||
+               NVL2(NVL((SELECT MD.SZDESC
+                          FROM MST_DISTRICT@GLM_LOS MD
+                         WHERE MD.SZCITYCODE = OAD.SZCITYCODE
+                           AND MD.SZDISTRICTCODE = OAD.SZDISTRICTCODE),
+                        OAD.SZSHORTADDRESS1),
+                    NVL((SELECT MD.SZDESC
+                          FROM MST_DISTRICT@GLM_LOS MD
+                         WHERE MD.SZCITYCODE = OAD.SZCITYCODE
+                           AND MD.SZDISTRICTCODE = OAD.SZDISTRICTCODE),
+                        OAD.SZSHORTADDRESS1) || ',',
+                    '') ||
+               (SELECT MC.SZDESC
+                  FROM MST_CITY@GLM_LOS MC
+                 WHERE MC.SZCITYCODE = OAD.SZCITYCODE
+                   AND MC.SZSTATECODE = OAD.SZSTATECODE) ADDRESS
+                   ,oad.iaddressseq
+                   ,oad.szmobil mobile
+          FROM 
+               otheraddressdetails@GLM_LOS oad,
+               mst_city@GLM_LOS cit,
+               mst_state@GLM_LOS stat
+         WHERE 1=1
+           AND OAD.SZADDRESSTYPE = 'RS'
+           AND oad.isrlno = 1
+           AND oad.szcitycode = cit.szcitycode(+)
+           AND oad.szstatecode = cit.szstatecode(+)
+           AND oad.szstatecode = stat.szstatecode(+)
+           AND oad.szcountry = stat.szcountrycode(+)
+       ) rs_addr
+       ,GENERALCONDITIONMASTER@GLM_LOS gen
+WHERE 1=1
+AND tawd.szpartytype = 'BORROWER' 
+AND gen.SZSYSTEMNAME = 'LOS'
+AND gen.SZCONDITION = 'PROFESSION'
+AND gen.szvalue = tawd.szprofession
+AND rs_addr.iaddressseq = TAWD.Iaddressseq
+AND tawd.szloanapplnno = '{param}'
