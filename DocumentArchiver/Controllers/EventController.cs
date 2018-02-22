@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using DocumentArchiver.EntityModels;
+using DocumentArchiver.Filter;
 using DocumentArchiver.Helper;
 using DocumentArchiver.ViewModels;
 using DocumentArchiver.Wrapper;
@@ -20,6 +21,7 @@ using NLog;
 namespace DocumentArchiver.Controllers
 {
     [Authorize]
+    [CustomExceptionFilterAttribute]
     public class EventController : Controller
     {
         private static Logger _logger = LogManager.GetCurrentClassLogger();
@@ -198,6 +200,7 @@ namespace DocumentArchiver.Controllers
                 if (eventLog == null) return BadRequest("Cant find EventLog");
                 _context.EventLog.Remove(eventLog);
                 await _context.SaveChangesAsync();
+                Utility.DeleteUpload(eventLog.Guid, Path.Combine(Program.ExeDir, PathUploadPath));
                 return Ok();
             }
         }

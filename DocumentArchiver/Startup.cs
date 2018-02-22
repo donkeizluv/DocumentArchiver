@@ -122,6 +122,11 @@ namespace DocumentArchiver
                 routes.MapRoute(
                    name: "api",
                    template: "API/{controller}/{action}");
+                //Use this to fallback route in case of using vue router heavily
+                //Install - Package Microsoft.AspNetCore.SpaServices
+                //routes.MapSpaFallbackRoute(
+                //    name: "spa-fallback",
+                //    defaults: new { controller = "Home", action = "Index" });
             });
         }
 

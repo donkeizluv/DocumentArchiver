@@ -7,10 +7,12 @@ using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using DocumentArchiver.ViewModels;
+using DocumentArchiver.Filter;
 
 namespace DocumentArchiver.Controllers
 {
     [Authorize]
+    [CustomExceptionFilterAttribute]
     public class HomeController : Controller
     {
         private DocumentArchiverContext _context;

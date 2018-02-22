@@ -16,7 +16,9 @@
                            v-bind:disabled="isdisabled" 
                            type="search">
                 <span class="input-group-btn">
-                    <button class="btn btn-link" type="button">
+                    <button class="btn btn-link"
+                            type="button"
+                            v-on:click="SearchButtonClicked">
                         <i class="fa fa-search"></i>
                     </button>
                 </span>
@@ -33,7 +35,7 @@
             return {
                 SearchModel: {
                     FilterBy: 'ContractNumber',
-                    FilterString: ""
+                    FilterString: ''
                 }
             };
         },

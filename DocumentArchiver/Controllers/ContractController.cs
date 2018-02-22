@@ -10,10 +10,12 @@ using DocumentArchiver.Wrapper;
 using DocumentArchiver.Indus;
 using DocumentArchiver.Helper;
 using System.Linq;
+using DocumentArchiver.Filter;
 
 namespace DocumentArchiver.Controllers
 {
     [Authorize]
+    [CustomExceptionFilterAttribute]
     public class ContractController : Controller
     {
         private static Logger _logger = LogManager.GetCurrentClassLogger();

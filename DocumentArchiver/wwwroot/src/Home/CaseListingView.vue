@@ -2,12 +2,12 @@
     <div>
         <!--Modals-->
         <!--<modal name="m-app-error" v-bind:clickToClose=false>
-        </modal>-->
+    </modal>-->
         <v-dialog :clickToClose=false />
         <!--End modals-->
         <div class="row top-margin">
             <div class="col-sm-8 mx-auto">
-                <search-bar v-bind:isdisabled="Loading"
+                <search-bar v-bind:isdisabled="IsLoading"
                             v-on:submit="SearchButtonClicked"></search-bar>
             </div>
         </div>
@@ -18,37 +18,37 @@
                         <thead>
                             <tr>
                                 <th>
-                                    <button class="btn btn-link" v-on:click="CollapseAll" v-bind:disabled="Loading">
+                                    <button class="btn btn-link" v-on:click="CollapseAll" v-bind:disabled="IsLoading">
                                         <span class="fas fa-minus fa-sm"></span> All
                                     </button>
                                 </th>
                                 <th>
-                                    <button class="btn btn-link" v-on:click="OrderByClicked('ContractNumber')" v-bind:disabled="Loading">
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('ContractNumber')" v-bind:disabled="IsLoading">
                                         <span v-html="OrderState('ContractNumber')"></span>Số Hd.
                                     </button>
                                 </th>
                                 <th>
-                                    <button class="btn btn-link" v-on:click="OrderByClicked('CustomerName')" v-bind:disabled="Loading">
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('CustomerName')" v-bind:disabled="IsLoading">
                                         <span v-html="OrderState('CustomerName')"></span>Tên Kh.
                                     </button>
                                 </th>
                                 <th>
-                                    <button class="btn btn-link" v-on:click="OrderByClicked('IdentityCard')" v-bind:disabled="Loading">
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('IdentityCard')" v-bind:disabled="IsLoading">
                                         <span v-html="OrderState('IdentityCard')"></span>CMND
                                     </button>
                                 </th>
                                 <th>
-                                    <button class="btn btn-link" v-on:click="OrderByClicked('Phone')" v-bind:disabled="Loading">
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('Phone')" v-bind:disabled="IsLoading">
                                         <span v-html="OrderState('Phone')"></span>SĐT
                                     </button>
                                 </th>
                                 <th>
-                                    <button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="Loading">
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="IsLoading">
                                         <span v-html="OrderState('CreateTime')"></span>Ngày tạo
                                     </button>
                                 </th>
                                 <th>
-                                    <button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="Loading">
+                                    <button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="IsLoading">
                                         <span v-html="OrderState('Username')"></span>Người tạo
                                     </button>
                                 </th>
@@ -58,7 +58,7 @@
                             <template v-for="item in Items">
                                 <tr>
                                     <td>
-                                        <button v-on:click="ToggleEventDetails(item.ContractId)" class="btn btn-sm btn-link" v-bind:disabled="Loading">
+                                        <button v-on:click="ToggleEventDetails(item.ContractId)" class="btn btn-sm btn-link" v-bind:disabled="IsLoading">
                                             <span class="fas" v-bind:class="{'fa-minus': IsShowingEventDetails(item.ContractId),
                                                   'fa-plus': !IsShowingEventDetails(item.ContractId)}">
                                             </span>
@@ -89,13 +89,15 @@
                                 <!--@*expandable details*@-->
                                 <tr>
                                     <!--colspan 9999 will break Edge-->
-                                    <event-details :key="item.ContractId"
+                                    <event-details v-bind:key="item.ContractId"
                                                    v-bind:id="item.ContractId"
                                                    v-bind:spancol=7
                                                    v-show="IsShowingEventDetails(item.ContractId)"
-                                                   v-on:populatecompleted="DetailsLoadCompleted"
+                                                   v-on:populatecompleted="SetLoadingState(false)"
                                                    v-on:exception="ShowErrorDialog"
-                                                   v-on:success="ShowSuccessToast"/>
+                                                   v-on:success="ShowSuccessToast"
+                                                   v-on:startuploading="SetLoadingState(true)"
+                                                   v-on:uploadfinished="SetLoadingState(false)"/>
                                     <!--<other-details v-bind:dealer="dealer" v-show="IsShowingOtherDetails(dealer.DealerId)"></other-details>
 
                                 <doc-details v-on:displayscannclicked="OpenNewScanPage"
@@ -115,12 +117,13 @@
                                 <!--Contract number-->
                                 <td>
                                     <div class="input-group">
-                                        <input class="form-control form-control-sm" 
+                                        <input class="form-control form-control-sm"
+                                               placeholder="Số hợp đồng"
                                                type="search"
                                                v-model="NewItem.ContractNumber"
                                                maxlength="20">
                                         <span class="input-group-btn">
-                                            <button class="btn btn-link" 
+                                            <button class="btn btn-link"
                                                     v-on:click="CheckContract"
                                                     v-bind:disabled="!CanCheck">
                                                 <span class="fas fa-check"></span>Check
@@ -133,21 +136,21 @@
                                     <input type="text"
                                            class="form-control form-control-sm"
                                            readonly
-                                           v-model="NewItem.CustomerName"/>
+                                           v-model="NewItem.CustomerName" />
                                 </td>
                                 <!--Id card-->
                                 <td>
                                     <input type="text"
                                            class="form-control form-control-sm"
                                            readonly
-                                           v-model="NewItem.IdentityCard"/>
+                                           v-model="NewItem.IdentityCard" />
                                 </td>
                                 <!--Phone-->
                                 <td>
                                     <input type="text"
                                            class="form-control form-control-sm"
                                            readonly
-                                           v-model="NewItem.Phone"/>
+                                           v-model="NewItem.Phone" />
                                 </td>
                                 <!--Operations buttons-->
                                 <td colspan="2">
@@ -160,14 +163,14 @@
                                             OK
                                         </button>
                                     </div>
-                                    
+
                                     <!--<div class="d-inline-flex">
-                                        <button class="btn btn-sm btn-outline-danger ml-2"
-                                                v-on:click="ClearNewItem">
-                                            <span class="fas fa-times"></span>
-                                        </button>
-                                    </div>-->
-                                </td>                                
+                                    <button class="btn btn-sm btn-outline-danger ml-2"
+                                            v-on:click="ClearNewItem">
+                                        <span class="fas fa-times"></span>
+                                    </button>
+                                </div>-->
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -245,7 +248,6 @@
                 FilterString: '',
                 OrderBy: '',
                 OrderAsc: true,
-                Loading: false,
 
                 //Injected: null,
                 Items: [],
@@ -279,6 +281,9 @@
                         return true;
                 }
                 return false;
+            },
+            IsLoading: function () {
+                return this.$data.Loading;
             }
             //CanExport: function () {
             //    return common.arrayContains(this.$data.Ability, "ExportRequests");
@@ -306,7 +311,7 @@
                 this.UpdatePagination(model.TotalPages, model.TotalRows);
             },
             LoadItems: function (url) {
-                this.$data.Loading = true;
+                this.SetLoadingState(true);
                 var that = this;
                 //that.$data.IsLoading = true; //way too fast to show loading animation, causes jerking in UI
                 //console.log(url);
@@ -321,7 +326,7 @@
                         //that.$data.RequestListingModel = response.data;
                         that.$data.Items = response.data.Items;
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
-                        that.$data.Loading = false;
+                        that.SetLoadingState(false);
                         that.$data.ShowingEventDetails = []; //Reset shown details
                         //Re-render
                         //that.$forceUpdate();
@@ -362,8 +367,8 @@
             //Page number clicked handler
             PageNavClicked: function (page) {
                 ////router.push({ path: `${page}/${type}/${contains}` })
-                if (this.$data.Loading) return;
-                this.$data.Loading = true;
+                if (this.IsLoading) return;
+                this.SetLoadingState(true);
                 this.$data.OnPage = page;
                 this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(page) });
             },
@@ -456,9 +461,9 @@
                     });
             },
             //Detail
-            DetailsLoadCompleted: function () {
-                this.$data.Loading = false;
-            },
+            //DetailsLoadCompleted: function () {
+            //    this.IsLoading = false;
+            //},
             IsShowingEventDetails: function (id) {
                 var index = this.$data.ShowingEventDetails.indexOf(id);
                 if (index != -1) {
@@ -467,13 +472,13 @@
                 return false;
             },
             ToggleEventDetails: function (id) {
-                if (this.$data.Loading) return;
+                if (this.IsLoading) return;
                 var index = this.$data.ShowingEventDetails.indexOf(id);
                 if (index == -1) {
                     //shows
                     this.HideDetails(id);
                     this.$data.ShowingEventDetails.push(id);
-                    this.$data.Loading = true;
+                    this.SetLoadingState(true);
                     //Broadcast events
                     this.$emit("populatedetails", id);
                 }
@@ -495,8 +500,8 @@
             },
             //order methods
             OrderByClicked: function (orderBy) {
-                if (this.$data.Loading) return;
-                this.$data.Loading = true; //prevent click spamming
+                if (this.IsLoading) return;
+                this.SetLoadingState(true); //prevent click spamming
                 //Flip order by
                 if (this.$data.OrderBy == orderBy) {
                     this.$data.OrderAsc = !this.$data.OrderAsc;
@@ -519,6 +524,9 @@
             },
             Refresh: function () {
                 this.LoadItems(this.GetCurrentItemsAPI);
+            },
+            SetLoadingState(state) {
+                this.$data.Loading = state;
             }
         }
     };

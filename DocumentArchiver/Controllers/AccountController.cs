@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using DocumentArchiver.EntityModels;
+using DocumentArchiver.Filter;
 using DocumentArchiver.Helper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace DocumentArchiver.Controllers
 {
+    [CustomExceptionFilterAttribute]
     public class AccountController : Controller
     {
         private DocumentArchiverContext _context;

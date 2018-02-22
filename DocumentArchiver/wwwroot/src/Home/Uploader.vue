@@ -65,7 +65,7 @@
                 this.$data.File = file;
                 this.$data.Valid = false;
                 //Check file type
-                if (this.IsFileTypeValid(file.name)) {
+                if (this.IsFileTypeValid(file.name) && this.maxSize >= file.size) {
                     this.$data.Valid = true;
                     return;
                 }
@@ -73,16 +73,6 @@
                     this.$data.Errors.push('File upload không hợp lệ');
                     return;
                 }
-                //Check file size
-                if (this.maxSize >= file.size) {
-                    this.$data.Valid = true;
-                    return;
-                }
-                else {
-                    this.$data.Errors.push('File upload quá lớn(' + file.size + ' > ' + this.maxSize + ')');
-                    return;
-                }
-                
             },
             IsFileTypeValid: function (name) {
                 //If no accept is define then true

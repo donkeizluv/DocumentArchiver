@@ -9,32 +9,32 @@
                                 <thead>
                                     <tr>
                                         <td>
-                                            <button class="btn btn-link" v-on:click="OrderByClicked('EventId')" v-bind:disabled="Loading">
+                                            <button class="btn btn-link" v-on:click="OrderByClicked('EventId')" v-bind:disabled="IsLoading">
                                                 <span v-html="OrderState('EventId')"></span>#
                                             </button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-link" v-on:click="OrderByClicked('Name')" v-bind:disabled="Loading">
+                                            <button class="btn btn-link" v-on:click="OrderByClicked('Name')" v-bind:disabled="IsLoading">
                                                 <span v-html="OrderState('Name')"></span>Sự kiện
                                             </button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-link" v-on:click="OrderByClicked('DateOfEvent')" v-bind:disabled="Loading">
+                                            <button class="btn btn-link" v-on:click="OrderByClicked('DateOfEvent')" v-bind:disabled="IsLoading">
                                                 <span v-html="OrderState('DateOfEvent')"></span>Ngày sự kiện
                                             </button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="Loading">
+                                            <button class="btn btn-link" v-on:click="OrderByClicked('CreateTime')" v-bind:disabled="IsLoading">
                                                 <span v-html="OrderState('CreateTime')"></span>Ngày tạo
                                             </button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-link" v-on:click="OrderByClicked('Filetype')" v-bind:disabled="Loading">
+                                            <button class="btn btn-link" v-on:click="OrderByClicked('Filetype')" v-bind:disabled="IsLoading">
                                                 <span v-html="OrderState('Filetype')"></span>Loại file
                                             </button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="Loading">
+                                            <button class="btn btn-link" v-on:click="OrderByClicked('Username')" v-bind:disabled="IsLoading">
                                                 <span v-html="OrderState('Username')"></span>Người đăng
                                             </button>
                                         </td>
@@ -140,6 +140,7 @@
                                         <td class="top-border"><span class="text-primary form-text">*</span></td>
                                         <td class="top-border">
                                             <input type="text"
+                                                   placeholder="Tên sự kiện"
                                                    class="form-control form-control-sm"
                                                    v-bind:class="{'attention-border' : !IsNewEventNameValid, 'green-border' : IsNewEventNameValid}"
                                                    v-model="NewItem.Name"
@@ -154,7 +155,7 @@
                                         <td class="top-border" colspan="2">
                                             <uploader v-bind:accept="UploaderOption.Accept"
                                                       v-bind:max-size="UploaderOption.MaxSize"
-                                                      button-text="Upload (3mb<)"
+                                                      v-bind:button-text="UploaderOption.Text"
                                                       ref="uploader">
                                             </uploader>
                                         </td>
@@ -167,7 +168,8 @@
                                             </uploader>
                                         </td>-->
                                         <td class="top-border" colspan="3">
-                                            <input type="text" 
+                                            <input type="text"
+                                                   placeholder="Ghi chú"
                                                    v-model="NewItem.Note" 
                                                    class="form-control form-control-sm"
                                                    v-bind:maxlength="FieldLength.Note"/>
@@ -182,7 +184,8 @@
                                                     class="btn btn-sm"
                                                     v-bind:class="{'btn-success' : CanSaveNewItem,
                                                     'btn-secondary' : !CanSaveNewItem}">
-                                                OK
+                                                <i v-if="IsUploading" class="fas fa-spinner fa-pulse"/>
+                                                <i v-else>OK</i>
                                             </button>
                                         </td>
                                         <!--<td class="top-border">
@@ -232,6 +235,9 @@
     const successEvent = 'success';
     const exEvent = 'exception';
 
+    const startUploadEventName = 'startuploading';
+    const uploadFinishedEventName = 'uploadfinished'
+
     export default {
         name: 'event-details',
         template: '#event-details-template',
@@ -250,6 +256,7 @@
             return {
                 Loading: false,
                 Populated: false,
+                Uploading: false,
 
                 OnPage: 1,
                 OrderBy: 'EventId',
@@ -271,13 +278,21 @@
                 TotalPages: 0,
 
                 UploaderOption: {
-                    Accept: '.jpg, .jpeg, .bmp, .png, .doc, .docx, .msg, .pdf',
-                    MaxSize: 3145728 //3 MB
+                    Text: "Upload (13mb<)",
+                    //Accept: '.jpg, .jpeg, .bmp, .png, .doc, .docx, .msg, .pdf',
+                    //MaxSize: 3145728 //3 MB
+                    Accept: ".zip, .rar, .7z, .tar, .gzip",
+                    MaxSize: 13631488 //13MB
                 }
-                
             };
         },
         computed: {
+            IsUploading: function () {
+                return this.$data.Uploading;
+            },
+            IsLoading: function () {
+                return this.$data.Loading;
+            },
             IsNewEventDateValid: function () {
                 return this.IsDateValid(this.$data.NewItem.DateOfEvent);
             },
@@ -353,6 +368,10 @@
             },
 
             PostNewItem: function () {
+                if (this.IsLoading || this.IsUploading) return;
+                this.$emit(startUploadEventName);
+                this.$data.Uploading = true;
+                this.$data.Loading = true;
                 var url = API.NewEventAPI;
                 var that = this;
                 var formData = new FormData();
@@ -373,11 +392,17 @@
                         that.$emit(successEvent, 'Thêm sự kiện mới thành công!')
                         that.ClearNewItem();
                         that.Refresh();
+                        that.$emit(uploadFinishedEventName);
+                        that.$data.Uploading = false;
+                        that.$data.Loading = false;
                     })
                     .catch(function (error) {
                         //Not 2xx code
                         console.log(error);
+                        that.$emit(uploadFinishedEventName);
                         that.$emit(exEvent, 'Lỗi trong quá trình tạo sự kiện mới.');
+                        that.$data.Uploading = false;
+                        that.$data.Loading = false;
                     });
             },
             SubmitChanges: function (id) {

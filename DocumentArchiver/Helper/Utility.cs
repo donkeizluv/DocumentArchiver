@@ -21,6 +21,29 @@ namespace DocumentArchiver.Helper
                 await file.CopyToAsync(stream);
             }
         }
+        public static bool DeleteUpload(string fileName, string folderPath)
+        {
+            try
+            {
+                File.Delete(Path.Combine(folderPath, fileName));
+                return true;
+            }
+            catch (FileNotFoundException ex)
+            {
+                EnviromentHelper.LogException(ex, _logger);
+                return false;
+            }
+            catch (IOException ex)
+            {
+                EnviromentHelper.LogException(ex, _logger);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                EnviromentHelper.LogException(ex, _logger);
+                return false;
+            }
+        }
         public static bool GetUpload(string fileName, string folderPath, out FileStream stream)
         {
             stream = null;
