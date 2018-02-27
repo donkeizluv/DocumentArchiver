@@ -1,4 +1,14 @@
 ﻿export default {
+    //Claims
+    Ability : 'Ability',
+    CanDeleteClaim : 'Delete',
+    CanUpdateClaim : 'Update',
+    CanCreateClaim: 'Create',
+    CanDownloadClaim: 'Download',
+
+    //API
+
+    //Contract
     ContractListingAPI: "/API/Contract/Get?",
     CheckContractAPI: "/API/Contract/Check",
     CreateContractAPI: "/API/Contract/Create",
@@ -11,5 +21,3 @@
     DownloadAPI: "/API/Event/Download?id={id}",
     DownloadZipAPI: "/API/Event/DownloadZip?id={id}"
 }
-
-

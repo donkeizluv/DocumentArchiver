@@ -200,13 +200,12 @@
 </template>
 <script>
     import axios from 'axios'    
-    import common from '../Common'
-    import API from '../Home/API'
+    import common from '../Home/Common'
     import searchBar from '../Home/SearchBar.vue'
     import eventDetails from '../Home/EventDetails.vue'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
-    import appConst from '../AppConst'
+    import appConst from '../Home/AppConst'
 
     const errorModal = 'm-app-error';
 
@@ -270,7 +269,7 @@
         },
         computed: {
             GetCurrentItemsAPI: function () {
-                return API.ContractListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
+                return appConst.ContractListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
             },
             CanSaveNewItem: function () {
                 return this.$data.IsNewCaseValid;
@@ -400,7 +399,7 @@
             },
             //Check before submit new item
             CheckContract: function () {
-                var url = API.CheckContractAPI;
+                var url = appConst.CheckContractAPI;
                 var that = this;
                 var formData = new FormData();
                 formData.append('contractNumber', this.$data.NewItem.ContractNumber);
@@ -431,7 +430,7 @@
             },
             //Call api to create new item
             PostNewItem: function () {
-                var url = API.CreateContractAPI;
+                var url = appConst.CreateContractAPI;
                 var that = this;
                 var formData = new FormData();
                 formData.append('contractNumber', this.$data.NewItem.ContractNumber);

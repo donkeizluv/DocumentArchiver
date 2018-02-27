@@ -219,13 +219,12 @@
     </td>
 </template>
 <script>
-    import API from '../Home/API'
     import axios from 'axios'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
     import uploader from '../Home/Uploader.vue'
     import moment from 'moment'
-    //import appConst from '../AppConst'
+    import appConst from '../Home/AppConst'
 
     const JSDate = 'YYYY-MM-DD';
     const successEvent = 'success';
@@ -320,7 +319,7 @@
                 return this.$data.TotalPages > 1;
             },
             GetCurrentItemsAPI: function () {
-               return API.EventListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
+                return appConst.EventListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
             }
         },
         created: function () {
@@ -376,7 +375,7 @@
                 this.$emit(startUploadEventName);
                 this.$data.Uploading = true;
                 this.$data.Loading = true;
-                var url = API.NewEventAPI;
+                var url = appConst.NewEventAPI;
                 var that = this;
                 var formData = new FormData();
                 formData.append('ContractId', this.id);
@@ -410,7 +409,7 @@
                     });
             },
             SubmitChanges: function (id) {
-                var url = API.UpdateEventAPI;
+                var url = appConst.UpdateEventAPI;
                 var that = this;
                 var itemIndex = this.FindItemIndex(id)
                 var formData = new FormData();
@@ -437,7 +436,7 @@
                     });
             },
             DeleteEvent: function (id) {
-                var url = API.DeleteEventAPI;
+                var url = appConst.DeleteEventAPI;
                 var that = this;
                 var itemIndex = this.FindItemIndex(id)
                 var formData = new FormData();
@@ -549,7 +548,7 @@
             },
             DownloadFile: function (id) {
                 var s64 = encodeURIComponent(btoa(id));
-                var url = API.DownloadAPI;
+                var url = appConst.DownloadAPI;
                 url = url.replace('{id}', s64);
                 console.log(s64);
                 console.log(url);
@@ -557,7 +556,7 @@
             },
             DownloadZip: function () {
                 var s64 = encodeURIComponent(btoa(this.id));
-                var url = API.DownloadZipAPI;
+                var url = appConst.DownloadZipAPI;
                 url = url.replace('{id}', s64);
                 console.log(s64);
                 console.log(url);

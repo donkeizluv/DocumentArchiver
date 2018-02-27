@@ -3,8 +3,8 @@ import VueRouter from 'vue-router'
 import CaseListingView from './CaseListingView.vue'
 import VModal from 'vue-js-modal'
 import Toasted from 'vue-toasted'
-import appConst from '../AppConst'
-import mixin from '../Mixin'
+import appConst from '../Home/AppConst'
+import mixin from '../Home/Mixin'
 
 //Init router
 var router = new VueRouter({
