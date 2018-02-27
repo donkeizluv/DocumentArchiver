@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using DocumentArchiver.ViewModels;
 using DocumentArchiver.Filter;
+using static DocumentArchiver.ApiParameter.ListingParams;
+using DocumentArchiver.Helper;
 
 namespace DocumentArchiver.Controllers
 {
@@ -31,7 +33,16 @@ namespace DocumentArchiver.Controllers
             {
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                 var factory = new ContractVMFactory(_context);
-                var model = await factory.Create(page, type, contain, order, asc);
+                var paramBuilder = new ParamBuilder()
+                   .SetPage(page)
+                   .SetType(type).SetContain(contain)
+                   .SetOrderBy(order)
+                   .SetAsc(asc)
+                   .SetHttpContext(HttpContext)
+                   .SetDbContext(_context);
+                var model = await factory.Create(paramBuilder.Build());
+                //Fill claims to init app permission
+                model.Claims = SessionHelper.ClaimsToDict(HttpContext.User.Claims);
                 return View(model);
             }
         }

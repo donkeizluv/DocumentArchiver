@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using NLog;
+using static DocumentArchiver.ApiParameter.ListingParams;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -75,7 +76,14 @@ namespace DocumentArchiver.Controllers
             {
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                 var factory = new EventVMFactory(_context);
-                var model = await factory.Create(id, page, order, asc);
+                var paramBuilder = new ParamBuilder()
+                    .SetId(id)
+                    .SetPage(page)
+                    .SetOrderBy(order)
+                    .SetAsc(asc)
+                    .SetHttpContext(HttpContext)
+                    .SetDbContext(_context);
+                var model = await factory.Create(paramBuilder.Build());
                 return Ok(model);
             }
         }
@@ -91,7 +99,7 @@ namespace DocumentArchiver.Controllers
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                 var eventLog = await _context.EventLog.SingleOrDefaultAsync(e => e.EventId == eventId);
                 if (eventLog == null) return BadRequest("Cant find EventLog");
-                if(!Utility.GetUpload(eventLog.Guid, Path.Combine(Program.ExeDir, PathUploadPath), out FileStream stream))
+                if(!FileStorage.GetUpload(eventLog.Guid, Path.Combine(Program.ExeDir, PathUploadPath), out FileStream stream))
                 {
                     return NoContent();
                 }
@@ -118,7 +126,7 @@ namespace DocumentArchiver.Controllers
                 foreach (var file in files)
                 {
                     var fileName = file.Value;
-                    if (!Utility.GetUpload(file.Key, Path.Combine(Program.ExeDir, PathUploadPath), out byte[] bytes))
+                    if (!FileStorage.GetUpload(file.Key, Path.Combine(Program.ExeDir, PathUploadPath), out byte[] bytes))
                     {
                         _logger.Error($"Cant find {file.Key} to zip");
                         return NoContent();
@@ -132,7 +140,7 @@ namespace DocumentArchiver.Controllers
                 }
                 stream.Position = 0;
                 return File(stream, System.Net.Mime.MediaTypeNames.Application.Zip,
-                    $"{contract.ContractNumber}_{DateTime.Today.ToString(Const.OnlyNumberDate)}.zip");
+                    $"{contract.ContractNumber}_{DateTime.Today.ToString(AppConst.OnlyNumberDate)}.zip");
             }
         }
 
@@ -165,7 +173,7 @@ namespace DocumentArchiver.Controllers
                     Note = post.Note?? string.Empty,
                     Username = Utility.GetContextUsername(HttpContext)
                 };
-                await Utility.SaveUpload(file, fileGuid, Path.Combine(Program.ExeDir, PathUploadPath));
+                await FileStorage.SaveUpload(file, fileGuid, Path.Combine(Program.ExeDir, PathUploadPath));
                 _context.EventLog.Add(eventLog);
                 await _context.SaveChangesAsync();
                 return Ok();
@@ -200,7 +208,7 @@ namespace DocumentArchiver.Controllers
                 if (eventLog == null) return BadRequest("Cant find EventLog");
                 _context.EventLog.Remove(eventLog);
                 await _context.SaveChangesAsync();
-                Utility.DeleteUpload(eventLog.Guid, Path.Combine(Program.ExeDir, PathUploadPath));
+                FileStorage.DeleteUpload(eventLog.Guid, Path.Combine(Program.ExeDir, PathUploadPath));
                 return Ok();
             }
         }

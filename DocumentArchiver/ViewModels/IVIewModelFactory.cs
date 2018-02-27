@@ -1,4 +1,4 @@
-﻿using DocumentArchiver.EntityModels;
+﻿using DocumentArchiver.ApiParameter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DocumentArchiver.ViewModels
 {
-    public class EventViewModel : ViewModel<EventLog>
+    interface IViewModelFactory<T> where T : IViewModel
     {
-        public override int ItemPerPage => 5;
+        Task<T> Create(ListingParams apiParam);
     }
 }

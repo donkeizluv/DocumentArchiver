@@ -89,10 +89,10 @@
                                 <!--@*expandable details*@-->
                                 <tr>
                                     <!--colspan 9999 will break Edge-->
-                                    <event-details v-bind:key="item.ContractId"
+                                    <event-details v-show="IsShowingEventDetails(item.ContractId)"
+                                                   v-bind:key="item.ContractId"
                                                    v-bind:id="item.ContractId"
                                                    v-bind:spancol=7
-                                                   v-show="IsShowingEventDetails(item.ContractId)"
                                                    v-on:populatecompleted="SetLoadingState(false)"
                                                    v-on:exception="ShowErrorDialog"
                                                    v-on:success="ShowSuccessToast"
@@ -120,6 +120,7 @@
                                         <input class="form-control form-control-sm"
                                                placeholder="Số hợp đồng"
                                                type="search"
+                                               v-bind:disabled="!CanCreate"
                                                v-model="NewItem.ContractNumber"
                                                maxlength="20">
                                         <span class="input-group-btn">
@@ -205,6 +206,7 @@
     import eventDetails from '../Home/EventDetails.vue'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
+    import appConst from '../AppConst'
 
     const errorModal = 'm-app-error';
 
@@ -248,7 +250,6 @@
                 FilterString: '',
                 OrderBy: '',
                 OrderAsc: true,
-
                 //Injected: null,
                 Items: [],
                 TotalRows: 0,
@@ -285,23 +286,20 @@
             IsLoading: function () {
                 return this.$data.Loading;
             }
-            //CanExport: function () {
-            //    return common.arrayContains(this.$data.Ability, "ExportRequests");
-            //},
-            //CanSeeAll: function () {
-            //    return common.arrayContains(this.$data.Ability, "SeeAllRequests");
-            //}
         },
         methods: {
             //init app
             Init: function () {
                 //Load injected
                 var model = window.model;
-                if (!model) {
+                if (!model || !model.Claims) {
                    //Show app init failed
+                    this.ShowErrorDialog('Có lỗi trong quá trình tải app :(');
                     return;
                 }
+                //console.log(model);
                 //this.$data.Injected = model;
+                this.$data.Ability = model.Claims;
                 this.$data.FilterBy = model.FilterBy;
                 this.$data.FilterString = model.FilterString;
                 this.$data.OnPage = model.OnPage;

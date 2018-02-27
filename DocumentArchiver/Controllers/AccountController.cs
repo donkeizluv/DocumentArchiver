@@ -87,20 +87,10 @@ namespace DocumentArchiver.Controllers
                 if (loginLevel == LoginResult.NoPermission) return NoPermission();
                 if (loginLevel == LoginResult.NotActive) return NotActive();
                 //OK proceed
-                //claims
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, userName.ToLower(), ClaimValueTypes.String, Issuer),
-                    new Claim(ClaimTypes.Role, loginLevel.ToString(), ClaimValueTypes.String, Issuer)
-                };
-                //add abilities to claims 
-                foreach (var ability in user.UserAbility)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, ability.AbilityName));
-                }
+             
                 //add claims to identity
                 var userIdentity = new ClaimsIdentity("UserCred");
-                userIdentity.AddClaims(claims);
+                userIdentity.AddClaims(GetClaims(userName, user));
                 //add identity to principal
                 var userPrincipal = new ClaimsPrincipal(userIdentity);
                 await HttpContext.SignInAsync(
@@ -108,7 +98,7 @@ namespace DocumentArchiver.Controllers
                     userPrincipal,
                     new AuthenticationProperties
                     {
-                        ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
+                        ExpiresUtc = DateTime.UtcNow.AddMinutes(45)
                         //IsPersistent = false,
                         //AllowRefresh = false
                     });
@@ -117,7 +107,21 @@ namespace DocumentArchiver.Controllers
                 return Ok(new { Valid = true, Message = string.Empty });
             }
         }
-
+        private List<Claim> GetClaims(string userName, User user)
+        {
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, userName.ToLower()),
+                    new Claim(AppConst.LayerName, user.LayerName),
+                    new Claim(AppConst.LayerRank, user.LayerNameNavigation.Rank.ToString())
+                };
+            //add abilities to claims 
+            foreach (var ability in user.UserAbility)
+            {
+                claims.Add(new Claim(AppConst.Ability, ability.AbilityName));
+            }
+            return claims;
+        }
         private IActionResult LoginFail()
         {
             return Ok(new { Valid = false, Message = "Đăng nhập thất bại." });
@@ -167,7 +171,10 @@ namespace DocumentArchiver.Controllers
             if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(pwd))
                 return LoginResult.Error;
             if (!ValidateCredentials(userName, pwd)) return LoginResult.Error;
-            user = context.User.Include(u => u.UserAbility).FirstOrDefault(u => u.Username == userName);
+            //Includes everything needs to be added to Claims
+            user = context.User.Include(u => u.UserAbility)
+                .Include(u => u.LayerNameNavigation)
+                .FirstOrDefault(u => u.Username == userName);
             if (user == null)
                 return LoginResult.NoPermission; //no permission
             if (!user.Active)

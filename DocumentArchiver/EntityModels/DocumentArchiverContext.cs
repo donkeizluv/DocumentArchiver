@@ -7,9 +7,11 @@ namespace DocumentArchiver.EntityModels
     public partial class DocumentArchiverContext : DbContext
     {
         public virtual DbSet<Ability> Ability { get; set; }
+        public virtual DbSet<ActionLog> ActionLog { get; set; }
         public virtual DbSet<Contract> Contract { get; set; }
         public virtual DbSet<ContractSharing> ContractSharing { get; set; }
         public virtual DbSet<EventLog> EventLog { get; set; }
+        public virtual DbSet<Layer> Layer { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAbility> UserAbility { get; set; }
 
@@ -24,6 +26,23 @@ namespace DocumentArchiver.EntityModels
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.Description).HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<ActionLog>(entity =>
+            {
+                entity.HasKey(e => e.LogId);
+
+                entity.Property(e => e.Action)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Created).HasColumnType("datetime");
+
+                entity.Property(e => e.Message)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Ref).HasMaxLength(50);
             });
 
             modelBuilder.Entity<Contract>(entity =>
@@ -117,6 +136,15 @@ namespace DocumentArchiver.EntityModels
                     .HasConstraintName("FK_EventLog_User");
             });
 
+            modelBuilder.Entity<Layer>(entity =>
+            {
+                entity.HasKey(e => e.LayerName);
+
+                entity.Property(e => e.LayerName)
+                    .HasMaxLength(20)
+                    .ValueGeneratedNever();
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Username);
@@ -126,6 +154,16 @@ namespace DocumentArchiver.EntityModels
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.LastLogin).HasColumnType("datetime");
+
+                entity.Property(e => e.LayerName)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.HasOne(d => d.LayerNameNavigation)
+                    .WithMany(p => p.User)
+                    .HasForeignKey(d => d.LayerName)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_User_Layer");
             });
 
             modelBuilder.Entity<UserAbility>(entity =>

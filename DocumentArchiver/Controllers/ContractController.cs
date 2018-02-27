@@ -11,6 +11,7 @@ using DocumentArchiver.Indus;
 using DocumentArchiver.Helper;
 using System.Linq;
 using DocumentArchiver.Filter;
+using static DocumentArchiver.ApiParameter.ListingParams;
 
 namespace DocumentArchiver.Controllers
 {
@@ -37,7 +38,14 @@ namespace DocumentArchiver.Controllers
             {
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                 var factory = new ContractVMFactory(_context);
-                var model = await factory.Create(page, type, contain, order, asc);
+                var paramBuilder = new ParamBuilder()
+                    .SetPage(page)
+                    .SetType(type).SetContain(contain)
+                    .SetOrderBy(order)
+                    .SetAsc(asc)
+                    .SetHttpContext(HttpContext)
+                    .SetDbContext(_context);
+                var model = await factory.Create(paramBuilder.Build());
                 return Ok(model);
             }
         }
@@ -56,6 +64,7 @@ namespace DocumentArchiver.Controllers
                 return Ok(new ResponseWrapper() { Valid = false, Message = reason });
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromForm]string contractNumber)
         {

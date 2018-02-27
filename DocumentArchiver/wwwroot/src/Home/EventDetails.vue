@@ -44,7 +44,8 @@
                                         <td>
                                             <div class="d-inline-flex">
                                                 <button class="btn btn-link"
-                                                        v-on:click="DownloadZip">
+                                                        v-on:click="DownloadZip"
+                                                        v-bind:disabled="!CanDownload">
                                                     <span class="fas fa-download" />
                                                     Tất cả
                                                 </button>
@@ -56,14 +57,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="event in Items">
+                                    <!--Why is this doesnt work in reverse if????-->
+                                    <tr v-if="!HasItems">
+                                        <td v-bind:colspan="ColumnCount">
+                                            <h6 class="text-secondary">Chưa có sự kiện nào :(</h6>
+                                        </td>
+                                    </tr>
+                                    <tr v-else v-for="event in Items">
                                         <td class="top-border"><span>{{event.EventId}}</span></td>
                                         <!--Name-->
                                         <td v-if="IsEditMode(event.EventId)" class="top-border">
                                             <input type="text"
-                                                   class="form-control form-control-sm" 
-                                                   v-model="event.Name" 
-                                                   v-bind:maxlength="FieldLength.Name"/>
+                                                   class="form-control form-control-sm"
+                                                   v-model="event.Name"
+                                                   v-bind:maxlength="FieldLength.Name" />
                                         </td>
                                         <td v-else class="top-border">
                                             <span>{{event.Name}}</span>
@@ -83,7 +90,7 @@
                                             <input type="text"
                                                    class="form-control form-control-sm"
                                                    v-model="event.Note"
-                                                   v-bind:maxlength="FieldLength.Note"/>
+                                                   v-bind:maxlength="FieldLength.Note" />
                                         </td>
                                         <td v-else class="top-border">
                                             <span>{{event.Note}}</span>
@@ -91,8 +98,9 @@
                                         <!--Download file-->
                                         <td class="top-border">
                                             <button class="btn btn-sm btn-link"
+                                                    v-bind:disabled="!CanDownload"
                                                     v-on:click="DownloadFile(event.EventId)">
-                                                <span class="fas fa-download"/>
+                                                <span class="fas fa-download" />
                                             </button>
                                         </td>
                                         <!--CRUD-->
@@ -106,6 +114,7 @@
                                                 </button>
                                                 <!--Enter edit-->
                                                 <button v-else
+                                                        v-bind:disabled="!CanUpdate"
                                                         class="btn btn-sm btn-outline-primary"
                                                         v-on:click="EnterEditMode(event.EventId)">
                                                     <span class="fas fa-pencil-alt"></span>
@@ -121,7 +130,7 @@
                                                 <!--Delete-->
                                                 <button v-if="!IsDeleteMode(event.EventId)"
                                                         class="btn btn-sm"
-                                                        v-bind:disabled="IsEditMode(event.EventId)"
+                                                        v-bind:disabled="!CanDelete || IsEditMode(event.EventId)"
                                                         v-bind:class="{'btn-outline-secondary': IsEditMode(event.EventId),
                                                         'btn-outline-danger': !IsEditMode(event.EventId)}"
                                                         v-on:click="EnterDeleteMode(event.EventId)">
@@ -130,74 +139,60 @@
                                                 <button v-else
                                                         class="btn btn-sm btn-outline-danger"
                                                         v-on:click="DeleteEvent(event.EventId)">
-                                                   <span class="fas fa-check-circle"></span>
+                                                    <span class="fas fa-check-circle"></span>
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
-                                    <!--Add new record-->
+                                    <!--Add new record controls-->
                                     <tr>
                                         <td class="top-border"><span class="text-primary form-text">*</span></td>
                                         <td class="top-border">
                                             <input type="text"
+                                                   v-bind:disabled="!CanCreate"
                                                    placeholder="Tên sự kiện"
                                                    class="form-control form-control-sm"
                                                    v-bind:class="{'attention-border' : !IsNewEventNameValid, 'green-border' : IsNewEventNameValid}"
                                                    v-model="NewItem.Name"
-                                                   v-bind:maxlength="FieldLength.Name"/>
+                                                   v-bind:maxlength="FieldLength.Name" />
                                         </td>
+                                        <!--Date of event-->
                                         <td class="top-border">
                                             <input type="date"
+                                                   v-bind:disabled="!CanCreate"
                                                    class="form-control form-control-sm"
                                                    v-bind:class="{'attention-border' : !IsNewEventDateValid, 'green-border' : IsNewEventDateValid}"
-                                                   v-model="NewItem.DateOfEvent"/>
+                                                   v-model="NewItem.DateOfEvent" />
                                         </td>
+                                        <!--File upload-->
                                         <td class="top-border" colspan="2">
-                                            <uploader v-bind:accept="UploaderOption.Accept"
+                                            <uploader v-bind:disabled="!CanCreate"
+                                                      v-bind:accept="UploaderOption.Accept"
                                                       v-bind:max-size="UploaderOption.MaxSize"
                                                       v-bind:button-text="UploaderOption.Text"
                                                       ref="uploader">
                                             </uploader>
                                         </td>
-                                        <!--Upload-->
-                                        <!--<td class="top-border">
-                                            <uploader v-bind:accept="UploaderOption.Accept"
-                                                      v-bind:max-size="UploaderOption.MaxSize"
-                                                      button-text="Upload (3mb<)"
-                                                      ref="uploader">
-                                            </uploader>
-                                        </td>-->
+                                        <!--Note-->
                                         <td class="top-border" colspan="3">
                                             <input type="text"
+                                                   v-bind:disabled="!CanCreate"
                                                    placeholder="Ghi chú"
-                                                   v-model="NewItem.Note" 
+                                                   v-model="NewItem.Note"
                                                    class="form-control form-control-sm"
-                                                   v-bind:maxlength="FieldLength.Note"/>
+                                                   v-bind:maxlength="FieldLength.Note" />
                                         </td>
-                                        <!--<td class="top-border">
-                                            <input type="text" v-model="NewItem.Note" class="form-control"/>
-                                        </td>-->
-                                        <!--Empty download-->
+                                        <!--CRUD controls-->
                                         <td class="top-border">
                                             <button v-on:click="PostNewItem"
                                                     v-bind:disabled="!CanSaveNewItem"
                                                     class="btn btn-sm"
                                                     v-bind:class="{'btn-success' : CanSaveNewItem,
                                                     'btn-secondary' : !CanSaveNewItem}">
-                                                <i v-if="IsUploading" class="fas fa-spinner fa-pulse"/>
+                                                <i v-if="IsUploading" class="fas fa-spinner fa-pulse" />
                                                 <i v-else>OK</i>
                                             </button>
                                         </td>
-                                        <!--<td class="top-border">
-                                            If no errors then enable save new btn
-                                            <button v-on:click="PostNewItem"
-                                                    v-bind:disabled="!CanSaveNewItem"
-                                                    class="btn btn-sm mt-1"
-                                                    v-bind:class="{'btn-success' : CanSaveNewItem,
-                                                    'btn-secondary' : !CanSaveNewItem}">
-                                                OK
-                                            </button>
-                                        </td>-->
                                     </tr>
                                 </tbody>
                             </table>
@@ -230,13 +225,18 @@
     import queryBuilder from 'query-string'
     import uploader from '../Home/Uploader.vue'
     import moment from 'moment'
+    //import appConst from '../AppConst'
 
     const JSDate = 'YYYY-MM-DD';
     const successEvent = 'success';
     const exEvent = 'exception';
 
+    //Event names
     const startUploadEventName = 'startuploading';
-    const uploadFinishedEventName = 'uploadfinished'
+    const uploadFinishedEventName = 'uploadfinished';
+    const populateEventBroadcast = 'populatedetails';
+    const populateCompleted = 'populatecompleted';
+
 
     export default {
         name: 'event-details',
@@ -272,6 +272,7 @@
                     Name: 50,
                     Note: 150,
                 },
+                ColumnCount: 9,
                 Items: [],
                 ItemsCopy: [], //Store original item to support revert
                 TotalRows: 0,
@@ -304,6 +305,9 @@
                     return true;
                 return false;
             },
+            HasItems: function () {
+                return this.$data.Items.length > 0;
+            },
             CanSaveNewItem: function () {
                 if (this.IsNewEventNameValid &&
                     this.IsNewEventDateValid &&
@@ -317,11 +321,11 @@
             },
             GetCurrentItemsAPI: function () {
                return API.EventListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
-            },
+            }
         },
         created: function () {
             //Listen to parent's event
-            this.$parent.$on('populatedetails', this.Populate);
+            this.$parent.$on(populateEventBroadcast, this.Populate);
         },
         methods: {
             ComposeCurrentItemsQuery: function (pageNumber) {
@@ -338,7 +342,7 @@
                 //Check if has items
                 if (this.$data.Populated) {
                     //Do nothing
-                    this.$emit('populatecompleted');
+                    this.$emit(populateCompleted);
                     return;
                 }
                 //Load items
@@ -359,7 +363,7 @@
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
                         that.$data.Loading = false;
                         that.$data.Populated = true;
-                        that.$emit('populatecompleted');
+                        that.$emit(populateCompleted);
                     })
                     .catch(function (error) {
                         console.log(error);

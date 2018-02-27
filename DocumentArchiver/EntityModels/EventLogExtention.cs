@@ -12,21 +12,21 @@ namespace DocumentArchiver.EntityModels
         {
             get
             {
-                return DateOfEvent.ToString(Const.StandardDate);
+                return DateOfEvent.ToString(AppConst.StandardDate);
             }
         }
         public string DateOfEventJS
         {
             get
             {
-                return DateOfEvent.ToString(Const.JavascriptDate);
+                return DateOfEvent.ToString(AppConst.JavascriptDate);
             }
         }
         public string CreateTimeString
         {
             get
             {
-                return CreateTime.ToString(Const.StandardDate);
+                return CreateTime.ToString(AppConst.StandardDate);
             }
         }
     }

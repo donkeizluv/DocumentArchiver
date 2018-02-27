@@ -15,7 +15,9 @@ namespace DocumentArchiver.EntityModels
         public string Username { get; set; }
         public bool Active { get; set; }
         public DateTime? LastLogin { get; set; }
+        public string LayerName { get; set; }
 
+        public Layer LayerNameNavigation { get; set; }
         public ICollection<Contract> Contract { get; set; }
         public ICollection<EventLog> EventLog { get; set; }
         public ICollection<UserAbility> UserAbility { get; set; }

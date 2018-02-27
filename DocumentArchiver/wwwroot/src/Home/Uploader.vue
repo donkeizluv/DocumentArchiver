@@ -1,8 +1,9 @@
 ﻿<template id="uploader">
     <div v-if="File == null">
         <label class="btn btn-link no-bottom-pad">
-            <span class="fas fa-cloud-upload-alt" />
-            {{buttonText}}<input v-on:change="FileChanged"
+            <span class="fas fa-cloud-upload-alt"/>
+            {{buttonText}}<input v-bind:disabled="disabled"
+                                 v-on:change="FileChanged"
                                  type="file"
                                  v-bind:accept="accept"
                                  hidden />
@@ -10,7 +11,8 @@
     </div>
     <div v-else>
         <span v-bind:class="{'text-danger' : !IsFileValid, 'text-success' : IsFileValid}">{{FormatedFileName}}</span>
-        <button v-on:click="Clear" 
+        <button v-bind:disabled="disabled"
+                v-on:click="Clear" 
                 class="btn btn-sm">
             <span class="fas fa-times"></span>
         </button>
@@ -21,7 +23,7 @@
     export default {
         name: 'uploader',
         template: '#uploader',
-        props: ['accept', 'maxSize', 'buttonText'],
+        props: ['accept', 'maxSize', 'buttonText', 'disabled'],
         computed: {
             FirstError: function () {
                 return this.$data.Errors[0];

@@ -1,4 +1,5 @@
-﻿using DocumentArchiver.EntityModels;
+﻿using DocumentArchiver.ApiParameter;
+using DocumentArchiver.EntityModels;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DocumentArchiver.ViewModels
 {
-    public class EventVMFactory
+    public class EventVMFactory : IViewModelFactory<EventViewModel>
     {
         private static Logger _logger = LogManager.GetCurrentClassLogger();
         private DocumentArchiverContext _context;
@@ -16,13 +17,13 @@ namespace DocumentArchiver.ViewModels
             _context = context;
         }
 
-        public async Task<EventViewModel> Create(int id, int page, string orderBy, bool asc)
+        public async Task<EventViewModel> Create(ListingParams apiParam)
         {
-            string checkedOrder = orderBy;
-            bool checkedAsc = asc;
-            int checkedPage = page;
+            string checkedOrder = apiParam.OrderBy;
+            bool checkedAsc = apiParam.Asc;
+            int checkedPage = apiParam.Page;
             //Default order
-            if (string.IsNullOrEmpty(orderBy))
+            if (string.IsNullOrEmpty(apiParam.OrderBy))
             {
                 checkedOrder = nameof(Contract.CreateTime);
                 checkedAsc = false;
@@ -36,18 +37,18 @@ namespace DocumentArchiver.ViewModels
                 OrderAsc = checkedAsc
             };
 
-            var query = GetEventsByContractId(id, checkedPage, model.ItemPerPage, checkedOrder, checkedAsc, out var totalRows);
+            var query = GetEventsByContractId(apiParam, model.ItemPerPage, out var totalRows);
             model.TotalRows = totalRows;
             model.Items = await query.ToListAsync();
             return model;
 
         }
-        private IQueryable<EventLog> GetEventsByContractId(int id, int page, int take, string orderBy, bool asc, out int totalRows)
+        private IQueryable<EventLog> GetEventsByContractId(ListingParams apiParam, int take, out int totalRows)
         {
-            int excludedRows = (page - 1) * take;
-            var query = _context.EventLog.Where(e => e.ContractId == id);
+            int excludedRows = (apiParam.Page - 1) * take;
+            var query = _context.EventLog.Where(e => e.ContractId == apiParam.Id);
             totalRows = query.Count();
-            var ordered = OrderTranslater(query, orderBy, asc);
+            var ordered = OrderTranslater(query, apiParam.OrderBy, apiParam.Asc);
             return ordered.Skip(excludedRows).Take(take);
         }
 

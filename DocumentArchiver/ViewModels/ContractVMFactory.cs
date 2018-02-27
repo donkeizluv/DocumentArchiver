@@ -1,4 +1,6 @@
-﻿using DocumentArchiver.EntityModels;
+﻿using DocumentArchiver.ApiParameter;
+using DocumentArchiver.EntityModels;
+using DocumentArchiver.Logic;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using System.Linq;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DocumentArchiver.ViewModels
 {
-    public class ContractVMFactory
+    public class ContractVMFactory : IViewModelFactory<ContractViewModel>
     {
         private static Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -16,13 +18,13 @@ namespace DocumentArchiver.ViewModels
             _context = context;
         }
 
-        public async Task<ContractViewModel> Create(int page, string type, string contains, string orderBy, bool asc)
+        public async Task<ContractViewModel> Create(ListingParams apiParam)
         {
-            string checkedOrder = orderBy;
-            bool checkedAsc = asc;
-            int checkedPage = page;
+            string checkedOrder = apiParam.OrderBy;
+            bool checkedAsc = apiParam.Asc;
+            int checkedPage = apiParam.Page;
             //Default order
-            if(string.IsNullOrEmpty(orderBy))
+            if(string.IsNullOrEmpty(apiParam.OrderBy))
             {
                 checkedOrder = nameof(Contract.CreateTime);
                 checkedAsc = false;
@@ -32,30 +34,32 @@ namespace DocumentArchiver.ViewModels
             var model = new ContractViewModel
             {
                 OnPage = checkedPage,
-                FilterBy = type,
-                FilterString = contains,
+                FilterBy = apiParam.Type,
+                FilterString = apiParam.Contain,
                 OrderBy = checkedOrder,
                 OrderAsc = checkedAsc
             };
 
-            var query = GetFilteredContracts(checkedPage, model.ItemPerPage, type, contains, checkedOrder, checkedAsc, out var totalRows);
+            var query = GetFilteredContracts(apiParam, model.ItemPerPage, out var totalRows);
             model.TotalRows = totalRows;
             model.Items = await query.ToListAsync();
             return model;
 
         }
-        private IQueryable<Contract> GetFilteredContracts(int page, int take, string type, string contains, string orderBy, bool asc, out int totalRows)
+        private IQueryable<Contract> GetFilteredContracts(ListingParams apiParam, int take, out int totalRows)
         {
-            int excludedRows = (page - 1) * take;
-            var query = _context.Contract.AsQueryable();
-            totalRows = query.Count();
+            int excludedRows = (apiParam.Page - 1) * take;
+            //Apply logic/what to show based on layer here
+            var baseQuery = ContractLayer.GetContractSet(apiParam.HttpContext, apiParam.DbContext);
+            //var baseQuery = _context.Contract.AsQueryable();
+            totalRows = baseQuery.Count();
             //Check if filter is applied
-            if (!string.IsNullOrEmpty(type) && !string.IsNullOrEmpty(contains))
+            if (!string.IsNullOrEmpty(apiParam.Type) && !string.IsNullOrEmpty(apiParam.Contain))
             {
-                query = FilterTranslater(query, type, contains);
-                totalRows = query.Count();
+                baseQuery = FilterTranslater(baseQuery, apiParam.Type, apiParam.Contain);
+                totalRows = baseQuery.Count();
             }
-            var ordered = OrderTranslater(query, orderBy, asc);
+            var ordered = OrderTranslater(baseQuery, apiParam.OrderBy, apiParam.Asc);
             return ordered.Skip(excludedRows).Take(take);
         }
 

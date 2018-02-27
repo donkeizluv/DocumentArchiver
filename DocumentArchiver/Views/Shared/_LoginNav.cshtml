@@ -10,7 +10,7 @@
             <div class="nav-link">
                 Xin chào!
                 @User.Identities.First(u => u.IsAuthenticated &&
-                                  u.HasClaim(c => c.Type == ClaimTypes.Name)).FindFirst(ClaimTypes.Name).Value
+                                       u.HasClaim(c => c.Type == ClaimTypes.Name)).FindFirst(ClaimTypes.Name).Value
             </div>
         </li>
         <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="LogOut">Thoát</a></li>

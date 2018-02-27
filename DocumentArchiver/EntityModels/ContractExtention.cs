@@ -8,7 +8,7 @@ namespace DocumentArchiver.EntityModels
         {
             get
             {
-                return CreateTime.ToString(Const.StandardDate);
+                return CreateTime.ToString(AppConst.StandardDate);
             }
         }
     }

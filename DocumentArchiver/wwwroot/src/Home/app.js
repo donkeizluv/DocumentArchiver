@@ -2,7 +2,9 @@
 import VueRouter from 'vue-router'
 import CaseListingView from './CaseListingView.vue'
 import VModal from 'vue-js-modal'
-import Toasted from 'vue-toasted';
+import Toasted from 'vue-toasted'
+import appConst from '../AppConst'
+import mixin from '../Mixin'
 
 //Init router
 var router = new VueRouter({
@@ -22,9 +24,13 @@ Vue.use(Toasted,
         duration: 3333,
         position: 'top-center',
         theme: 'primary',
-        iconPack: 'fontawesome'});
+        iconPack: 'fontawesome'
+    });
+//Registers globally
+Vue.mixin(mixin);
 //Init
 new Vue({
+    //mixins: [mixin],
     el: '#app',
     router: router,
     render: h => h(CaseListingView),
