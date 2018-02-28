@@ -1,6 +1,8 @@
 ﻿export default {
     //Claims
-    Ability : 'Ability',
+    Ability: 'Ability',
+    LayerName: 'LayerName',
+    LayerRank: 'LayerRank',
     CanDeleteClaim : 'Delete',
     CanUpdateClaim : 'Update',
     CanCreateClaim: 'Create',

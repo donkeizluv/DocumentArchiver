@@ -1,11 +1,15 @@
 ﻿import Vue from 'vue'
+import Vuex from 'vuex'
 import VueRouter from 'vue-router'
-import CaseListingView from './CaseListingView.vue'
 import VModal from 'vue-js-modal'
 import Toasted from 'vue-toasted'
-import appConst from '../Home/AppConst'
-import mixin from '../Home/Mixin'
 
+import CaseListingView from './Component/CaseListingView.vue'
+import appConst from '../Home/AppConst'
+//import mixin from '../Home/mixin'
+import store from '../Home/vuex'
+
+Vue.use(Vuex)
 //Init router
 var router = new VueRouter({
     mode: 'history',
@@ -27,10 +31,11 @@ Vue.use(Toasted,
         iconPack: 'fontawesome'
     });
 //Registers globally
-Vue.mixin(mixin);
+//Vue.mixin(mixin);
 //Init
 new Vue({
     //mixins: [mixin],
+    store: new Vuex.Store(store),
     el: '#app',
     router: router,
     render: h => h(CaseListingView),

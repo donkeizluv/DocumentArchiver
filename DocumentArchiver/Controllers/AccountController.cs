@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DocumentArchiver.EntityModels;
 using DocumentArchiver.Filter;
 using DocumentArchiver.Helper;
+using DocumentArchiver.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -74,6 +75,14 @@ namespace DocumentArchiver.Controllers
             ViewBag.NoFooter = true;
             return View();
         }
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Info()
+        {
+            var model = new UserInfoViewModel() { Claims = SessionHelper.ClaimsToDict(HttpContext.User.Claims) };
+            return View(model);
+        }
+
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> DoLogin([FromForm]string userName = "", [FromForm]string pwd = "")

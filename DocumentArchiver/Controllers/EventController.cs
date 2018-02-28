@@ -90,6 +90,7 @@ namespace DocumentArchiver.Controllers
 
         //Download individual file
         [HttpGet]
+        [Authorize(Policy = nameof(AbilityList.Download))]
         public async Task<IActionResult> Download([FromQuery]string id)
         {
             if (!Utility.Decode64(id, out int eventId)) return BadRequest();
@@ -107,6 +108,7 @@ namespace DocumentArchiver.Controllers
             }
         }
         [HttpGet]
+        [Authorize(Policy = nameof(AbilityList.Download))]
         //Download all files of case
         public async Task<IActionResult> DownloadZip([FromQuery]string id)
         {
@@ -145,6 +147,7 @@ namespace DocumentArchiver.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = nameof(AbilityList.Create))]
         public async Task<IActionResult> Create([FromForm] NewEventLogPost post)
         {
             var file = post.File;
@@ -170,7 +173,8 @@ namespace DocumentArchiver.Controllers
                     Filetype = extention,
                     Filename = file.FileName,
                     Guid = fileGuid,
-                    Note = post.Note?? string.Empty,
+                    //Replace empty or JSON null with const
+                    Note = (post.Note?? AppConst.NA) == AppConst.JSONNull? AppConst.NA : post.Note,
                     Username = Utility.GetContextUsername(HttpContext)
                 };
                 await FileStorage.SaveUpload(file, fileGuid, Path.Combine(Program.ExeDir, PathUploadPath));
@@ -180,6 +184,7 @@ namespace DocumentArchiver.Controllers
             }
         }
         [HttpPost]
+        [Authorize(Policy = nameof(AbilityList.Update))]
         public async Task<IActionResult> Update([FromForm] UpdateEventLogPost post)
         {
             if (string.IsNullOrEmpty(post.Name))
@@ -199,6 +204,7 @@ namespace DocumentArchiver.Controllers
             }
         }
         [HttpPost]
+        [Authorize(Policy = nameof(AbilityList.Delete))]
         public async Task<IActionResult> Delete([FromForm]int eventId)
         {
             using (_context)

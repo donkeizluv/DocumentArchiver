@@ -56,6 +56,16 @@ namespace DocumentArchiver
                     //bc url query doesnt play well with form submit in Account/DoLogin
                     options.ReturnUrlParameter = "returnUrl";
                 });
+            //policy
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(AbilityList.Create, policy => policy.RequireClaim(AppConst.Ability, AbilityList.Create));
+                options.AddPolicy(AbilityList.Delete, policy => policy.RequireClaim(AppConst.Ability, AbilityList.Delete));
+                options.AddPolicy(AbilityList.Update, policy => policy.RequireClaim(AppConst.Ability, AbilityList.Update));
+                options.AddPolicy(AbilityList.Download, policy => policy.RequireClaim(AppConst.Ability, AbilityList.Download));
+                options.AddPolicy(AbilityList.ManageUser, policy => policy.RequireClaim(AppConst.Ability, AbilityList.ManageUser));
+            });
+
             //Compression
             services.AddResponseCompression(options =>
             {

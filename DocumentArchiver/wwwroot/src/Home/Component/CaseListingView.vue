@@ -200,14 +200,22 @@
 </template>
 <script>
     import axios from 'axios'    
-    import common from '../Home/Common'
-    import searchBar from '../Home/SearchBar.vue'
-    import eventDetails from '../Home/EventDetails.vue'
+    import common from '../Common'
+    import searchBar from '../Component/SearchBar.vue'
+    import eventDetails from '../Component/EventDetails.vue'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
-    import appConst from '../Home/AppConst'
+    import appConst from '../AppConst'
 
     const errorModal = 'm-app-error';
+    //Events
+    const PopulateDetail = 'populatedetails';
+
+    //Message
+    const CheckContractOK = 'Số hợp đồng hợp lệ';
+    const NewItemCreated = 'Tạo thành công!';
+    const NewItemFailed = 'Tạo thất bại!';
+    const GeneralError = 'Có lỗi xãy ra :(';
 
     //import InputModal from './InputModal.vue'
     //import DownPopup from './DownPopup.vue'
@@ -268,6 +276,9 @@
             };
         },
         computed: {
+            CanCreate: function () {
+                return this.$store.getters.CanCreate;
+            },
             GetCurrentItemsAPI: function () {
                 return appConst.ContractListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
             },
@@ -293,12 +304,17 @@
                 var model = window.model;
                 if (!model || !model.Claims) {
                    //Show app init failed
-                    this.ShowErrorDialog('Có lỗi trong quá trình tải app :(');
+                    this.ShowErrorDialog(GeneralError);
                     return;
                 }
                 //console.log(model);
                 //this.$data.Injected = model;
-                this.$data.Ability = model.Claims;
+                //this.$data.Claims = model.Claims;
+                //Commit to store
+                this.$store.commit(appConst.Ability, model.Claims[appConst.Ability]);
+                this.$store.commit(appConst.LayerName, model.Claims[appConst.LayerName]);
+                this.$store.commit(appConst.LayerRank, model.Claims[appConst.LayerRank]);
+
                 this.$data.FilterBy = model.FilterBy;
                 this.$data.FilterString = model.FilterString;
                 this.$data.OnPage = model.OnPage;
@@ -330,7 +346,7 @@
                     })
                     .catch(function (error) {
                         console.log(error);
-                        that.ShowErrorDialog('Không tải được danh sách!');
+                        that.ShowErrorDialog(GeneralError);
                     });
             },
             ShowSuccessToast(mess) {
@@ -415,7 +431,7 @@
                         }
                         if (response.data.Valid) {
                             //Check OK
-                            that.ShowSuccessToast('Số hợp đồng hợp lệ');
+                            that.ShowSuccessToast(CheckContractOK);
                             that.$data.IsNewCaseValid = true;
                             that.$data.NewItem = response.data.Data;
                         }
@@ -425,7 +441,7 @@
                         }
                     })
                     .catch(function (error) { //Not 2xx code
-                        that.ShowErrorDialog('Lỗi hệ thống. Vui lòng thử lại sau');
+                        that.ShowErrorDialog(GeneralError);
                     });
             },
             //Call api to create new item
@@ -445,7 +461,7 @@
                             return;
                         }
                         if (response.data.Valid) {
-                            that.ShowSuccessToast('Tạo case thành công.');
+                            that.ShowSuccessToast(NewItemCreated);
                             that.ClearNewItem();
                             that.Refresh();
                         }
@@ -454,7 +470,7 @@
                         }
                     })
                     .catch(function (error) {
-                        that.ShowErrorDialog('Lỗi hệ thống. Vui lòng thử lại sau');
+                        that.ShowErrorDialog(NewItemFailed);
                     });
             },
             //Detail
@@ -477,7 +493,7 @@
                     this.$data.ShowingEventDetails.push(id);
                     this.SetLoadingState(true);
                     //Broadcast events
-                    this.$emit("populatedetails", id);
+                    this.$emit(PopulateDetail, id);
                 }
                 else {
                     //hides

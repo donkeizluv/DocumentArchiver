@@ -10,9 +10,11 @@ namespace DocumentArchiver.Helper
         public static readonly string StandardDate = "dd/MM/yyyy";
         public static readonly string OnlyNumberDate = "ddMMyyyy";
         public static readonly string JavascriptDate = "yyyy-MM-dd";
+        public static readonly string NA = "N/A";
+        public static readonly string JSONNull = "null";
         public static readonly string[] AcceptedEventFile = { ".jpg", ".jpeg", ".bmp", ".png", ".doc", ".docx", ".pdf", ".msg" };
 
-        //Custom claims
+        //Custom claim types
         public static readonly string UserName = "Username";
         public static readonly string Ability = "Ability";
         public static readonly string LayerName = "LayerName";

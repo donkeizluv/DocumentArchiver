@@ -39,20 +39,20 @@
                                             </button>
                                         </td>
                                         <td>
-                                            <span class="d-lg-inline-flex">Ghi chú</span>
+                                            <span class="btn btn-link">Ghi chú</span>
                                         </td>
                                         <td>
                                             <div class="d-inline-flex">
                                                 <button class="btn btn-link"
                                                         v-on:click="DownloadZip"
-                                                        v-bind:disabled="!CanDownload">
+                                                        v-bind:disabled="!CanDownloadAll">
                                                     <span class="fas fa-download" />
                                                     Tất cả
                                                 </button>
                                             </div>
                                         </td>
                                         <td>
-                                            <span>Chỉnh sửa</span>
+                                            <span class="btn btn-link">Chỉnh sửa</span>
                                         </td>
                                     </tr>
                                 </thead>
@@ -108,7 +108,7 @@
                                             <div class="d-inline-flex">
                                                 <!--Clear changes button-->
                                                 <button v-if="IsEditMode(event.EventId)"
-                                                        class="btn btn-sm btn-warning"
+                                                        class="btn btn-sm btn-outline-warning"
                                                         v-on:click="ExitEditMode(event.EventId)">
                                                     <span class="fas fa-times"></span>
                                                 </button>
@@ -222,9 +222,10 @@
     import axios from 'axios'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
-    import uploader from '../Home/Uploader.vue'
+
+    import uploader from '../Component/Uploader.vue'
     import moment from 'moment'
-    import appConst from '../Home/AppConst'
+    import appConst from '../AppConst'
 
     const JSDate = 'YYYY-MM-DD';
     const successEvent = 'success';
@@ -306,6 +307,24 @@
             },
             HasItems: function () {
                 return this.$data.Items.length > 0;
+            },
+            CanUpdate: function () {
+                return this.$store.getters.CanUpdate;
+            },
+            CanDelete: function () {
+                return this.$store.getters.CanDelete;
+            },
+            CanCreate: function () {
+                return this.$store.getters.CanCreate;
+            },
+            CanDownload: function () {
+                return this.$store.getters.CanDownload;
+            },
+            CanDownloadAll: function () {
+                if (this.HasItems)
+                    if (this.CanDownload)
+                        return true;
+                return false;
             },
             CanSaveNewItem: function () {
                 if (this.IsNewEventNameValid &&

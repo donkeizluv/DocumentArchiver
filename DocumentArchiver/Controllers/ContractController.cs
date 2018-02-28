@@ -12,6 +12,7 @@ using DocumentArchiver.Helper;
 using System.Linq;
 using DocumentArchiver.Filter;
 using static DocumentArchiver.ApiParameter.ListingParams;
+using DocumentArchiver.Logic;
 
 namespace DocumentArchiver.Controllers
 {
@@ -51,6 +52,7 @@ namespace DocumentArchiver.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = nameof(AbilityList.Create))]
         public IActionResult Check([FromForm]string contractNumber)
         {
             if (string.IsNullOrEmpty(contractNumber)) return BadRequest();
@@ -66,6 +68,7 @@ namespace DocumentArchiver.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = nameof(AbilityList.Create))]
         public async Task<IActionResult> Create([FromForm]string contractNumber)
         {
             if (string.IsNullOrEmpty(contractNumber)) return BadRequest();
