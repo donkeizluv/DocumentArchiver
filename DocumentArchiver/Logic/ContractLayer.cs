@@ -7,6 +7,7 @@ namespace DocumentArchiver.Logic
 {
     static public class ContractLayer
     {
+        //TODO: log
         public static IQueryable<Contract> GetContractSet(HttpContext httpContext, DocumentArchiverContext dbContext)
         {
             if (httpContext == null) throw new ArgumentNullException();

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using DocumentArchiver.EntityModels;
 using DocumentArchiver.Filter;
@@ -15,13 +14,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace DocumentArchiver.Controllers
 {
     [CustomExceptionFilterAttribute]
     public class AccountController : Controller
     {
+        public const string AuthInterop = "Interop";
+        public const string AuthPrincipal = "Principal";
+        public const string AuthPrincipal2 = "Principal2";
+
         private DocumentArchiverContext _context;
         private IConfiguration _config;
 
@@ -37,6 +39,16 @@ namespace DocumentArchiver.Controllers
             get
             {
                 return _config.GetSection("Authentication").GetValue<bool>("NoPwdCheck");
+            }
+        }
+        internal string AuthMethod
+        {
+            get
+            {
+                var method = _config.GetSection("Authentication").GetValue<string>("Method");
+                if (string.IsNullOrEmpty(method))
+                    return AuthPrincipal;
+                return method;
             }
         }
 
@@ -164,14 +176,20 @@ namespace DocumentArchiver.Controllers
         {
             HttpContext.Session.Clear();
         }
-        private bool ValidateCredentials(string userName, string pwd)
+        private bool Validate(string userName, string pwd)
         {
             if (NoPwdCheck) return true;
-            using (var pc = new System.DirectoryServices.AccountManagement
-                .PrincipalContext(System.DirectoryServices.AccountManagement.ContextType.Domain, Domain))
+
+            switch (AuthMethod)
             {
-                // validate the credentials
-                return pc.ValidateCredentials(userName, pwd);
+                case AuthInterop:
+                    return WindowsAuth.Validate_Interop(userName, pwd, Domain);
+                case AuthPrincipal:
+                    return WindowsAuth.Validate_Principal(userName, pwd, Domain);
+                case AuthPrincipal2:
+                    return WindowsAuth.Validate_Principal2(userName, pwd, Domain);
+                default:
+                    throw new InvalidOperationException($"Auth method: {AuthPrincipal} is not valid");
             }
         }
         private LoginResult GetLoginLevel(string userName, string pwd, DocumentArchiverContext context, out User user)
@@ -179,7 +197,7 @@ namespace DocumentArchiver.Controllers
             user = null;
             if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(pwd))
                 return LoginResult.Error;
-            if (!ValidateCredentials(userName, pwd)) return LoginResult.Error;
+            if (!Validate(userName, pwd)) return LoginResult.Error;
             //Includes everything needs to be added to Claims
             user = context.User.Include(u => u.UserAbility)
                 .Include(u => u.LayerNameNavigation)

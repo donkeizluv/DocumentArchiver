@@ -10,7 +10,7 @@ namespace DocumentArchiver.Helper
 {
     public static class Utility
     {
-        private static Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static Logger _logger = LogManager.GetCurrentClassLogger();
         
         public static string GetContextUsername(HttpContext context)
         {

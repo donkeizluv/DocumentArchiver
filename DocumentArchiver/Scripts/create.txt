@@ -1,0 +1,192 @@
+﻿USE [DocumentArchive]
+GO
+/****** Object:  Table [dbo].[Ability]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Ability](
+	[AbilityName] [nvarchar](50) NOT NULL,
+	[Description] [nvarchar](100) NULL,
+ CONSTRAINT [PK_Ability] PRIMARY KEY CLUSTERED 
+(
+	[AbilityName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ActionLog]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ActionLog](
+	[LogId] [int] IDENTITY(1,1) NOT NULL,
+	[Created] [datetime] NOT NULL,
+	[Action] [nvarchar](50) NOT NULL,
+	[Code] [int] NOT NULL,
+	[Message] [nvarchar](100) NOT NULL,
+	[Ref] [nvarchar](50) NULL,
+ CONSTRAINT [PK_ActionLog] PRIMARY KEY CLUSTERED 
+(
+	[LogId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Contract]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Contract](
+	[ContractId] [int] IDENTITY(1,1) NOT NULL,
+	[ContractNumber] [nvarchar](20) NOT NULL,
+	[CustomerName] [nvarchar](50) NOT NULL,
+	[IdentityCard] [nvarchar](20) NOT NULL,
+	[Phone] [nvarchar](50) NULL,
+	[CreateTime] [datetime] NOT NULL,
+	[Username] [nvarchar](50) NOT NULL,
+ CONSTRAINT [PK_Contract] PRIMARY KEY CLUSTERED 
+(
+	[ContractId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ContractSharing]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ContractSharing](
+	[ShareId] [int] IDENTITY(1,1) NOT NULL,
+	[Keycode] [nvarchar](150) NOT NULL,
+	[Disabled] [bit] NOT NULL,
+	[CreatedOn] [datetime] NOT NULL,
+	[DisabledOn] [datetime] NULL,
+	[Hit] [int] NOT NULL,
+	[ContractId] [int] NOT NULL,
+ CONSTRAINT [PK_ContractSharing] PRIMARY KEY CLUSTERED 
+(
+	[ShareId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[EventLog]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EventLog](
+	[EventId] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[DateOfEvent] [datetime] NOT NULL,
+	[CreateTime] [datetime] NOT NULL,
+	[Note] [nvarchar](150) NULL,
+	[Filename] [nvarchar](150) NOT NULL,
+	[Guid] [nvarchar](36) NOT NULL,
+	[Filetype] [nvarchar](20) NOT NULL,
+	[ContractId] [int] NOT NULL,
+	[Username] [nvarchar](50) NOT NULL,
+ CONSTRAINT [PK_EventLog] PRIMARY KEY CLUSTERED 
+(
+	[EventId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Layer]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Layer](
+	[LayerName] [nvarchar](20) NOT NULL,
+	[Rank] [int] NOT NULL,
+ CONSTRAINT [PK_Layer] PRIMARY KEY CLUSTERED 
+(
+	[LayerName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[User]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[User](
+	[Username] [nvarchar](50) NOT NULL,
+	[Active] [bit] NOT NULL,
+	[LastLogin] [datetime] NULL,
+	[LayerName] [nvarchar](20) NOT NULL,
+ CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED 
+(
+	[Username] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UserAbility]    Script Date: 3/1/2018 1:44:57 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserAbility](
+	[AbilityName] [nvarchar](50) NOT NULL,
+	[Username] [nvarchar](50) NOT NULL,
+ CONSTRAINT [PK_UserAbility] PRIMARY KEY CLUSTERED 
+(
+	[AbilityName] ASC,
+	[Username] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Contract]  WITH CHECK ADD  CONSTRAINT [FK_Contract_User] FOREIGN KEY([Username])
+REFERENCES [dbo].[User] ([Username])
+GO
+ALTER TABLE [dbo].[Contract] CHECK CONSTRAINT [FK_Contract_User]
+GO
+ALTER TABLE [dbo].[ContractSharing]  WITH CHECK ADD  CONSTRAINT [FK_ContractSharing_Contract] FOREIGN KEY([ContractId])
+REFERENCES [dbo].[Contract] ([ContractId])
+GO
+ALTER TABLE [dbo].[ContractSharing] CHECK CONSTRAINT [FK_ContractSharing_Contract]
+GO
+ALTER TABLE [dbo].[EventLog]  WITH CHECK ADD  CONSTRAINT [FK_EventLog_Contract] FOREIGN KEY([ContractId])
+REFERENCES [dbo].[Contract] ([ContractId])
+GO
+ALTER TABLE [dbo].[EventLog] CHECK CONSTRAINT [FK_EventLog_Contract]
+GO
+ALTER TABLE [dbo].[EventLog]  WITH CHECK ADD  CONSTRAINT [FK_EventLog_User] FOREIGN KEY([Username])
+REFERENCES [dbo].[User] ([Username])
+GO
+ALTER TABLE [dbo].[EventLog] CHECK CONSTRAINT [FK_EventLog_User]
+GO
+ALTER TABLE [dbo].[User]  WITH CHECK ADD  CONSTRAINT [FK_User_Layer] FOREIGN KEY([LayerName])
+REFERENCES [dbo].[Layer] ([LayerName])
+GO
+ALTER TABLE [dbo].[User] CHECK CONSTRAINT [FK_User_Layer]
+GO
+ALTER TABLE [dbo].[UserAbility]  WITH CHECK ADD  CONSTRAINT [FK_UserAbility_Ability] FOREIGN KEY([AbilityName])
+REFERENCES [dbo].[Ability] ([AbilityName])
+GO
+ALTER TABLE [dbo].[UserAbility] CHECK CONSTRAINT [FK_UserAbility_Ability]
+GO
+ALTER TABLE [dbo].[UserAbility]  WITH CHECK ADD  CONSTRAINT [FK_UserAbility_User] FOREIGN KEY([Username])
+REFERENCES [dbo].[User] ([Username])
+GO
+ALTER TABLE [dbo].[UserAbility] CHECK CONSTRAINT [FK_UserAbility_User]
+GO
+
+
+-------------Insert defaults
+GO
+INSERT [dbo].[Ability] ([AbilityName], [Description]) VALUES (N'Create', N'Allow creating of new Contract and event entry')
+GO
+INSERT [dbo].[Ability] ([AbilityName], [Description]) VALUES (N'Delete', N'Allow deleting of events')
+GO
+INSERT [dbo].[Ability] ([AbilityName], [Description]) VALUES (N'Download', N'Allow downloading files of events')
+GO
+INSERT [dbo].[Ability] ([AbilityName], [Description]) VALUES (N'ManageUser', N'Access to user management page')
+GO
+INSERT [dbo].[Ability] ([AbilityName], [Description]) VALUES (N'Update', N'Allow modifiying event''s attributes')
+GO
+INSERT [dbo].[Layer] ([LayerName], [Rank]) VALUES (N'Layer1', 1)
+GO
+INSERT [dbo].[Layer] ([LayerName], [Rank]) VALUES (N'Layer2', 2)
+GO

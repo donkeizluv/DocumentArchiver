@@ -1,7 +1,7 @@
 ﻿'use strict';
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin')
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+//const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -14,7 +14,7 @@ module.exports = {
         filename: "[name]_[chunkhash].js"
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.js$/,
                 exclude: /(node_modules)/,
@@ -40,6 +40,9 @@ module.exports = {
         //    }
         //}),
         new CleanWebpackPlugin(['wwwroot/dist'], []),
-        new HardSourceWebpackPlugin()
-    ]
+        //new HardSourceWebpackPlugin()
+    ],
+    stats: {
+        warnings: false
+    }
 };

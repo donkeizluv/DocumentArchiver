@@ -58,92 +58,97 @@
                                 </thead>
                                 <tbody>
                                     <!--Why is this doesnt work in reverse if????-->
-                                    <tr v-if="!HasItems">
-                                        <td v-bind:colspan="ColumnCount">
-                                            <h6 class="text-secondary">Chưa có sự kiện nào :(</h6>
-                                        </td>
-                                    </tr>
-                                    <tr v-else v-for="event in Items">
-                                        <td class="top-border"><span>{{event.EventId}}</span></td>
-                                        <!--Name-->
-                                        <td v-if="IsEditMode(event.EventId)" class="top-border">
-                                            <input type="text"
-                                                   class="form-control form-control-sm"
-                                                   v-model="event.Name"
-                                                   v-bind:maxlength="FieldLength.Name" />
-                                        </td>
-                                        <td v-else class="top-border">
-                                            <span>{{event.Name}}</span>
-                                        </td>
-                                        <!--Date of event-->
-                                        <td v-if="IsEditMode(event.EventId)" class="top-border">
-                                            <input type="date" class="form-control form-control-sm" v-model="event.DateOfEventJS" />
-                                        </td>
-                                        <td v-else class="top-border">
-                                            <span>{{event.DateOfEventString}}</span>
-                                        </td>
-                                        <td class="top-border"><span>{{event.CreateTimeString}}</span></td>
-                                        <td class="top-border"><span>{{event.Filetype}}</span></td>
-                                        <td class="top-border"><span>{{event.Username}}</span></td>
-                                        <!--Note-->
-                                        <td v-if="IsEditMode(event.EventId)" class="top-border">
-                                            <input type="text"
-                                                   class="form-control form-control-sm"
-                                                   v-model="event.Note"
-                                                   v-bind:maxlength="FieldLength.Note" />
-                                        </td>
-                                        <td v-else class="top-border">
-                                            <span>{{event.Note}}</span>
-                                        </td>
-                                        <!--Download file-->
-                                        <td class="top-border">
-                                            <button class="btn btn-sm btn-link"
-                                                    v-bind:disabled="!CanDownload"
-                                                    v-on:click="DownloadFile(event.EventId)">
-                                                <span class="fas fa-download" />
-                                            </button>
-                                        </td>
-                                        <!--CRUD-->
-                                        <td class="top-border">
-                                            <div class="d-inline-flex">
-                                                <!--Clear changes button-->
-                                                <button v-if="IsEditMode(event.EventId)"
-                                                        class="btn btn-sm btn-outline-warning"
-                                                        v-on:click="ExitEditMode(event.EventId)">
-                                                    <span class="fas fa-times"></span>
+                                    <!--https://vuejs.org/v2/style-guide/#Avoid-v-if-with-v-for-essential-->
+                                    <template v-if="HasItems">
+                                        <tr v-for="event in Items" v-bind:key="event.EventId">
+                                            <td class="top-border"><span>{{event.EventId}}</span></td>
+                                            <!--Name-->
+                                            <td v-if="IsEditMode(event.EventId)" class="top-border">
+                                                <input type="text"
+                                                       class="form-control form-control-sm"
+                                                       v-model="event.Name"
+                                                       v-bind:maxlength="FieldLength.Name" />
+                                            </td>
+                                            <td v-else class="top-border">
+                                                <span>{{event.Name}}</span>
+                                            </td>
+                                            <!--Date of event-->
+                                            <td v-if="IsEditMode(event.EventId)" class="top-border">
+                                                <input type="date" class="form-control form-control-sm" v-model="event.DateOfEventJS" />
+                                            </td>
+                                            <td v-else class="top-border">
+                                                <span>{{event.DateOfEventString}}</span>
+                                            </td>
+                                            <td class="top-border"><span>{{event.CreateTimeString}}</span></td>
+                                            <td class="top-border"><span>{{event.Filetype}}</span></td>
+                                            <td class="top-border"><span>{{event.Username}}</span></td>
+                                            <!--Note-->
+                                            <td v-if="IsEditMode(event.EventId)" class="top-border">
+                                                <input type="text"
+                                                       class="form-control form-control-sm"
+                                                       v-model="event.Note"
+                                                       v-bind:maxlength="FieldLength.Note" />
+                                            </td>
+                                            <td v-else class="top-border">
+                                                <span>{{event.Note}}</span>
+                                            </td>
+                                            <!--Download file-->
+                                            <td class="top-border">
+                                                <button class="btn btn-sm btn-link"
+                                                        v-bind:disabled="!CanDownload"
+                                                        v-on:click="DownloadFile(event.EventId)">
+                                                    <span class="fas fa-download" />
                                                 </button>
-                                                <!--Enter edit-->
-                                                <button v-else
-                                                        v-bind:disabled="!CanUpdate"
-                                                        class="btn btn-sm btn-outline-primary"
-                                                        v-on:click="EnterEditMode(event.EventId)">
-                                                    <span class="fas fa-pencil-alt"></span>
-                                                </button>
-                                                <!--Save changes-->
-                                                <button class="btn btn-sm mr-2 ml-2"
-                                                        v-bind:class="{'btn-outline-success': CanSaveItem(event.EventId),
+                                            </td>
+                                            <!--CRUD-->
+                                            <td class="top-border">
+                                                <div class="d-inline-flex">
+                                                    <!--Clear changes button-->
+                                                    <button v-if="IsEditMode(event.EventId)"
+                                                            class="btn btn-sm btn-outline-warning"
+                                                            v-on:click="ExitEditMode(event.EventId)">
+                                                        <span class="fas fa-times"></span>
+                                                    </button>
+                                                    <!--Enter edit-->
+                                                    <button v-else
+                                                            v-bind:disabled="!CanUpdate"
+                                                            class="btn btn-sm btn-outline-primary"
+                                                            v-on:click="EnterEditMode(event.EventId)">
+                                                        <span class="fas fa-pencil-alt"></span>
+                                                    </button>
+                                                    <!--Save changes-->
+                                                    <button class="btn btn-sm mr-2 ml-2"
+                                                            v-bind:class="{'btn-outline-success': CanSaveItem(event.EventId),
                                                         'btn-outline-secondary': !CanSaveItem(event.EventId)}"
-                                                        v-bind:disabled="!CanSaveItem(event.EventId)"
-                                                        v-on:click="SubmitChanges(event.EventId)">
-                                                    <span class="fas fa-save"></span>
-                                                </button>
-                                                <!--Delete-->
-                                                <button v-if="!IsDeleteMode(event.EventId)"
-                                                        class="btn btn-sm"
-                                                        v-bind:disabled="!CanDelete || IsEditMode(event.EventId)"
-                                                        v-bind:class="{'btn-outline-secondary': IsEditMode(event.EventId),
+                                                            v-bind:disabled="!CanSaveItem(event.EventId)"
+                                                            v-on:click="SubmitChanges(event.EventId)">
+                                                        <span class="fas fa-save"></span>
+                                                    </button>
+                                                    <!--Delete-->
+                                                    <button v-if="!IsDeleteMode(event.EventId)"
+                                                            class="btn btn-sm"
+                                                            v-bind:disabled="!CanDelete || IsEditMode(event.EventId)"
+                                                            v-bind:class="{'btn-outline-secondary': IsEditMode(event.EventId),
                                                         'btn-outline-danger': !IsEditMode(event.EventId)}"
-                                                        v-on:click="EnterDeleteMode(event.EventId)">
-                                                    <span class="fas fa-trash-alt"></span>
-                                                </button>
-                                                <button v-else
-                                                        class="btn btn-sm btn-outline-danger"
-                                                        v-on:click="DeleteEvent(event.EventId)">
-                                                    <span class="fas fa-check-circle"></span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                            v-on:click="EnterDeleteMode(event.EventId)">
+                                                        <span class="fas fa-trash-alt"></span>
+                                                    </button>
+                                                    <button v-else
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            v-on:click="DeleteEvent(event.EventId)">
+                                                        <span class="fas fa-check-circle"></span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template v-else>
+                                        <tr>
+                                            <td v-bind:colspan="ColumnCount">
+                                                <h6 class="text-secondary">Chưa có sự kiện nào :(</h6>
+                                            </td>
+                                        </tr>
+                                    </template>
                                     <!--Add new record controls-->
                                     <tr>
                                         <td class="top-border"><span class="text-primary form-text">*</span></td>
