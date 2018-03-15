@@ -28,17 +28,17 @@ namespace DocumentArchiver.Helper
             }
             catch (FileNotFoundException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
             catch (IOException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
             catch (UnauthorizedAccessException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
         }
@@ -53,17 +53,17 @@ namespace DocumentArchiver.Helper
             }
             catch (FileNotFoundException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
             catch (IOException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
             catch (UnauthorizedAccessException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
 
@@ -79,17 +79,17 @@ namespace DocumentArchiver.Helper
             }
             catch (FileNotFoundException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
             catch (IOException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
             catch (UnauthorizedAccessException ex)
             {
-                EnviromentHelper.LogException(ex, _logger);
+                Utility.LogException(ex, _logger);
                 return false;
             }
 

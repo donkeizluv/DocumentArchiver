@@ -14,12 +14,13 @@ namespace DocumentArchiver.Helper
                 return pc.ValidateCredentials(userName, pwd);
             }
         }
-        public static bool Validate_Interop(string userName, string password, string domain)
-        {
-            var tokenHandler = IntPtr.Zero;
-            bool isValid = InteropAuth.LogonUser(userName, domain, password, 2, 0, ref tokenHandler);
-            return isValid;
-        }
+        //Does not work
+        //public static bool Validate_Interop(string userName, string password, string domain)
+        //{
+        //    var tokenHandler = IntPtr.Zero;
+        //    bool isValid = InteropAuth.LogonUser(userName, domain, password, 2, 0, ref tokenHandler);
+        //    return isValid;
+        //}
         public static bool Validate_Principal2(string username, string password, string domain)
         {
             try

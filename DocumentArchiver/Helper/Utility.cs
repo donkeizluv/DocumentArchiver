@@ -11,7 +11,17 @@ namespace DocumentArchiver.Helper
     public static class Utility
     {
         //private static Logger _logger = LogManager.GetCurrentClassLogger();
-        
+        public static void LogException(Exception ex, Logger logger)
+        {
+            logger.Error(ex.GetType().ToString());
+            logger.Error(ex.Message);
+            logger.Error(ex.StackTrace);
+            if (ex.InnerException != null)
+            {
+                logger.Error("Inner Ex:");
+                LogException(ex.InnerException, logger);
+            }
+        }
         public static string GetContextUsername(HttpContext context)
         {
             return context.User.FindFirst(ClaimTypes.Name).Value;

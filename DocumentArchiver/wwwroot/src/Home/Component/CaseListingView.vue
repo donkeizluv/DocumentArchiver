@@ -98,17 +98,7 @@
                                                    v-on:success="ShowSuccessToast"
                                                    v-on:startuploading="SetLoadingState(true)"
                                                    v-on:uploadfinished="SetLoadingState(false)"/>
-                                    <!--<other-details v-bind:dealer="dealer" v-show="IsShowingOtherDetails(dealer.DealerId)"></other-details>
-
-                                <doc-details v-on:displayscannclicked="OpenNewScanPage"
-                                             v-on:showuploadmodalclicked="ShowUploadModalHandler"
-                                             v-bind:documentnames="DocumentNames"
-                                             v-bind:uploaded="dealer.Scan"
-                                             v-bind:dealerid="dealer.DealerId"
-                                             v-show="IsShowingDocDetails(dealer.DealerId)"
-                                             v-bind:readonly=readonly
-                                             v-on:showprintdocclicked="PrinDocumentModalHandler"></doc-details>
-                                @*any better ways to do this?*@-->
+                                <!--any better ways to do this?-->
                                 </tr>
                             </template>
                             <!--New case-->
@@ -136,6 +126,7 @@
                                 <td>
                                     <input type="text"
                                            class="form-control form-control-sm"
+                                           placeholder="Tên khách hàng"
                                            readonly
                                            v-model="NewItem.CustomerName" />
                                 </td>
@@ -143,6 +134,7 @@
                                 <td>
                                     <input type="text"
                                            class="form-control form-control-sm"
+                                           placeholder="CMND"
                                            readonly
                                            v-model="NewItem.IdentityCard" />
                                 </td>
@@ -150,6 +142,7 @@
                                 <td>
                                     <input type="text"
                                            class="form-control form-control-sm"
+                                           placeholder="Số điện thoại"
                                            readonly
                                            v-model="NewItem.Phone" />
                                 </td>
@@ -286,6 +279,7 @@
                 return this.$data.IsNewCaseValid;
             },
             CanCheck: function () {
+                //No special chars in contract number
                 var format = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
                 if (this.$data.NewItem.ContractNumber) {
                     if (!format.test(this.$data.NewItem.ContractNumber))

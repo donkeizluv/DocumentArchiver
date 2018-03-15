@@ -20,7 +20,7 @@ namespace DocumentArchiver.Controllers
     [CustomExceptionFilterAttribute]
     public class AccountController : Controller
     {
-        public const string AuthInterop = "Interop";
+        //public const string AuthInterop = "Interop";
         public const string AuthPrincipal = "Principal";
         public const string AuthPrincipal2 = "Principal2";
 
@@ -182,8 +182,8 @@ namespace DocumentArchiver.Controllers
 
             switch (AuthMethod)
             {
-                case AuthInterop:
-                    return WindowsAuth.Validate_Interop(userName, pwd, Domain);
+                //case AuthInterop:
+                //    return WindowsAuth.Validate_Interop(userName, pwd, Domain);
                 case AuthPrincipal:
                     return WindowsAuth.Validate_Principal(userName, pwd, Domain);
                 case AuthPrincipal2:

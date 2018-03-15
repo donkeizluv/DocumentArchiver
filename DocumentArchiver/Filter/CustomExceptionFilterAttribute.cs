@@ -9,7 +9,7 @@ namespace DocumentArchiver.Filter
         public override void OnException(ExceptionContext context)
         {
             var logger = LogManager.GetLogger(context.ActionDescriptor.DisplayName);
-            EnviromentHelper.LogException(context.Exception, logger);
+            Utility.LogException(context.Exception, logger);
         }
     }
 }
