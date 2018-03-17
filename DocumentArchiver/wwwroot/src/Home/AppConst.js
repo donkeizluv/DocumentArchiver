@@ -21,5 +21,13 @@
     UpdateEventAPI: "/API/Event/Update",
     DeleteEventAPI: "/API/Event/Delete",
     DownloadAPI: "/API/Event/Download?id={id}",
-    DownloadZipAPI: "/API/Event/DownloadZip?id={id}"
+    DownloadZipAPI: "/API/Event/DownloadZip?id={id}",
+
+    //Search bar option
+    SearchBarValues: [
+        { value: 'ContractNumber', name: 'Số hợp đồng' },
+        { value: 'CustomerName', name: 'Tên khách hàng' },
+        { value: 'IdentityCard', name: 'CMND' },
+        { value: 'Phone', name: 'SDT' },
+        { value: 'Username', name: 'Người tạo' }]
 }

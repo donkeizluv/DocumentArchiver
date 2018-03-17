@@ -6,8 +6,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 module.exports = {
     entry: {
         //Shared: './wwwroot/src/shared.js',
-        Home: './wwwroot/src/Home/app.js'
-        //Adm: './wwwroot/src/Adm/app.js'
+        Home: './wwwroot/src/Home/app.js',
+        Adm: './wwwroot/src/Adm/app.js'
     },
     output: {
         path: __dirname + "/wwwroot/dist/",

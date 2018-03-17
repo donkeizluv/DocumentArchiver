@@ -27,7 +27,11 @@ namespace DocumentArchiver.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Index([FromQuery]int page = 1, [FromQuery]string type = "", [FromQuery]string contain = "", [FromQuery]string order = "", [FromQuery]bool asc = true)
+        public async Task<IActionResult> Index([FromQuery]int page = 1,
+            [FromQuery]string type = "",
+            [FromQuery]string contain = "",
+            [FromQuery]string order = "",
+            [FromQuery]bool asc = true)
         {
             using (_context)
             {

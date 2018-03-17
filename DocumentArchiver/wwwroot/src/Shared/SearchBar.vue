@@ -2,11 +2,7 @@
     <div class="form-inline justify-content-center">
         <div class="form-group">
             <select v-model="SearchModel.FilterBy" class="form-control custom-select" v-bind:disabled="isdisabled">
-                <option value="ContractNumber">Số hợp đồng</option>
-                <option value="CustomerName">Tên khách hàng</option>
-                <option value="IdentityCard">CMND</option>
-                <option value="Phone">SDT</option>
-                <option value="Username">Người tạo</option>
+                <option v-for="pair in valuePairs" v-bind:key="pair.value" v-bind:value="pair.value">{{pair.name}}</option>
             </select>
             <div class="input-group">
                 <input v-on:keyup.enter="SearchButtonClicked"
@@ -30,11 +26,15 @@
     export default {
         name: 'search-bar',
         template: '#search-bar-template',
-        props: ['isdisabled'],
+        props: ['isdisabled', 'valuePairs'],
+        created: function () {
+            //Default value
+            this.SearchModel.FilterBy = this.valuePairs[0].value;
+        },
         data: function () {
             return {
                 SearchModel: {
-                    FilterBy: 'ContractNumber',
+                    FilterBy: '',
                     FilterString: ''
                 }
             };

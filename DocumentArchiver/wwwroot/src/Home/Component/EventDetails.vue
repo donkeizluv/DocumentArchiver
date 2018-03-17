@@ -294,24 +294,24 @@
         },
         computed: {
             IsUploading: function () {
-                return this.$data.Uploading;
+                return this.Uploading;
             },
             IsLoading: function () {
-                return this.$data.Loading;
+                return this.Loading;
             },
             IsNewEventDateValid: function () {
-                return this.IsDateValid(this.$data.NewItem.DateOfEvent);
+                return this.IsDateValid(this.NewItem.DateOfEvent);
             },
             IsNewEventFileValid: function () {
                 return this.$refs.uploader.IsFileValid;
             },
             IsNewEventNameValid: function () {
-                if (this.$data.NewItem.Name)
+                if (this.NewItem.Name)
                     return true;
                 return false;
             },
             HasItems: function () {
-                return this.$data.Items.length > 0;
+                return this.Items.length > 0;
             },
             CanUpdate: function () {
                 return this.$store.getters.CanUpdate;
@@ -340,10 +340,10 @@
             },
             //Only show page nav if total pages > 1
             CanShowPageNav: function () {
-                return this.$data.TotalPages > 1;
+                return this.TotalPages > 1;
             },
             GetCurrentItemsAPI: function () {
-                return appConst.EventListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
+                return appConst.EventListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.OnPage));
             }
         },
         created: function () {
@@ -355,15 +355,15 @@
                 return {
                     id: this.id,
                     page: pageNumber,
-                    order: this.$data.OrderBy,
-                    asc: this.$data.OrderAsc,
+                    order: this.OrderBy,
+                    asc: this.OrderAsc,
                 };
             },
             Populate: function (id) {
                 //Check if this component being clicked
                 if (id != this.id) return;
                 //Check if has items
-                if (this.$data.Populated) {
+                if (this.Populated) {
                     //Do nothing
                     this.$emit(populateCompleted);
                     return;
@@ -373,7 +373,7 @@
             },
             LoadItems: function (url) {
                 //console.log(url);
-                this.$data.Loading = true;
+                this.Loading = true;
                 var that = this;
 
                 axios.get(url)
@@ -381,11 +381,11 @@
                         if (response.headers.login) {
                             window.location.href = response.headers.login;
                         }
-                        that.$data.Items = response.data.Items;
+                        that.Items = response.data.Items;
                         that.RefreshCopy(); //Clone Items to arr
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
-                        that.$data.Loading = false;
-                        that.$data.Populated = true;
+                        that.Loading = false;
+                        that.Populated = true;
                         that.$emit(populateCompleted);
                     })
                     .catch(function (error) {
@@ -397,19 +397,27 @@
             PostNewItem: function () {
                 if (this.IsLoading || this.IsUploading) return;
                 this.$emit(startUploadEventName);
-                this.$data.Uploading = true;
-                this.$data.Loading = true;
+                this.Uploading = true;
+                this.Loading = true;
                 var url = appConst.NewEventAPI;
                 var that = this;
                 var formData = new FormData();
                 formData.append('ContractId', this.id);
-                formData.append('Name', this.$data.NewItem.Name);
-                formData.append('DateOfEvent', this.$data.NewItem.DateOfEvent);
+                formData.append('Name', this.NewItem.Name);
+                formData.append('DateOfEvent', this.NewItem.DateOfEvent);
                 formData.append('File', this.$refs.uploader.GetFile);
-                formData.append('Note', this.$data.NewItem.Note);
+                formData.append('Note', this.NewItem.Note);
                 //console.log(formData);
-
-                axios.post(url, formData)
+                //var axiosConfig = {
+                //    //Progress changed callback
+                //    onUploadProgress: function (progressEvent) {
+                //        var percent = progressEvent.loaded / progressEvent.total * 100;
+                //        console.log(percent);
+                //        that.setProgressBar(percent);
+                //    }
+                //}
+                //this.startProgressBar();
+                axios.post(url, formData, axiosConfig)
                     .then(function (response) {
                         if (response.headers.login) {
                             //Login expired -> Redirect
@@ -420,16 +428,18 @@
                         that.ClearNewItem();
                         that.Refresh();
                         that.$emit(uploadFinishedEventName);
-                        that.$data.Uploading = false;
-                        that.$data.Loading = false;
+                        that.Uploading = false;
+                        that.Loading = false;
+                        //that.finishProgressBar();
                     })
                     .catch(function (error) {
                         //Not 2xx code
                         console.log(error);
                         that.$emit(uploadFinishedEventName);
                         that.$emit(exEvent, 'Lỗi trong quá trình tạo sự kiện mới.');
-                        that.$data.Uploading = false;
-                        that.$data.Loading = false;
+                        that.Uploading = false;
+                        that.Loading = false;
+                        //that.failProgressBar();
                     });
             },
             SubmitChanges: function (id) {
@@ -438,9 +448,9 @@
                 var itemIndex = this.FindItemIndex(id)
                 var formData = new FormData();
                 formData.append('EventId', id);
-                formData.append('Name', this.$data.Items[itemIndex].Name);
-                formData.append('DateOfEvent', this.$data.Items[itemIndex].DateOfEventJS);
-                formData.append('Note', this.$data.Items[itemIndex].Note);
+                formData.append('Name', this.Items[itemIndex].Name);
+                formData.append('DateOfEvent', this.Items[itemIndex].DateOfEventJS);
+                formData.append('Note', this.Items[itemIndex].Note);
                 //console.log(formData);
 
                 axios.post(url, formData)
@@ -451,7 +461,7 @@
                             return;
                         }
                         that.$emit(successEvent, 'Cập nhật thành công!');
-                        that.$set(that.$data.Items[itemIndex], 'EditMode', false)
+                        that.$set(that.Items[itemIndex], 'EditMode', false)
                         that.Refresh();
                     })
                     .catch(function (error) {
@@ -491,15 +501,15 @@
                 //Must be in Edit mode to save
                 if (!this.IsEditMode(id)) return false;
                 //Values check
-                if (this.$data.Items[index].Name &&
-                    this.IsDateValid(this.$data.Items[index].DateOfEventJS))
+                if (this.Items[index].Name &&
+                    this.IsDateValid(this.Items[index].DateOfEventJS))
                     return true;
                 return false;
             },
             RefreshCopy: function () {
-                var i = this.$data.Items.length;
+                var i = this.Items.length;
                 //No better way to clone?
-                while (i--) this.$data.ItemsCopy[i] = JSON.parse(JSON.stringify(this.$data.Items[i]));
+                while (i--) this.ItemsCopy[i] = JSON.parse(JSON.stringify(this.Items[i]));
             },
             ExitEditMode: function (id) {
                 var index = this.FindItemIndex(id);
@@ -508,29 +518,27 @@
                     return;
                 }
                 //No better way to clone?
-                var revert = JSON.parse(JSON.stringify(this.$data.ItemsCopy[index]));
+                var revert = JSON.parse(JSON.stringify(this.ItemsCopy[index]));
                 //console.log(clone);
-                this.$set(this.$data.Items, index, revert);
+                this.$set(this.Items, index, revert);
             },
             //Values changed tracking
             //Edit mode
             EnterEditMode: function (id) {
                 var index = this.FindItemIndex(id);
                 if (index == -1) {
-                    console.log('EnterEditMode: Cant find ' + id);
                     return;
                 }
                 //Exit delete mode if needed
-                this.$set(this.$data.Items[index], 'DeletePromt', false)
-                this.$set(this.$data.Items[index], 'EditMode', true)
+                this.$set(this.Items[index], 'DeletePromt', false)
+                this.$set(this.Items[index], 'EditMode', true)
             },
             IsEditMode: function (id) {
                 var index = this.FindItemIndex(id);
                 if (index == -1) {
-                    console.log('IsEditMode: Cant find ' + id);
                     return;
                 }
-                if (this.$data.Items[index].EditMode) {
+                if (this.Items[index].EditMode) {
                     return true;
                 }
                 return false;
@@ -539,19 +547,16 @@
             EnterDeleteMode: function (id) {
                 var index = this.FindItemIndex(id);
                 if (index == -1) {
-                    console.log('EnterDelete: Cant find ' + id);
                     return;
                 }
-                //Wait .8s before enter delete mode
-                this.$set(this.$data.Items[index], 'DeletePromt', true)
+                this.$set(this.Items[index], 'DeletePromt', true)
             },
             IsDeleteMode: function (id) {
                 var index = this.FindItemIndex(id);
                 if (index == -1) {
-                    console.log('IsDeleteMode: Cant find ' + id);
                     return;
                 }
-                if (this.$data.Items[index].DeletePromt) {
+                if (this.Items[index].DeletePromt) {
                     return true;
                 }
                 return false;
@@ -559,13 +564,13 @@
             //Clear new item
             ClearNewItem: function () {
                 this.$refs.uploader.Clear();
-                this.$data.NewItem.Name = null;
-                this.$data.NewItem.DateOfEvent = null;
-                this.$data.NewItem.Note = null;
+                this.NewItem.Name = null;
+                this.NewItem.DateOfEvent = null;
+                this.NewItem.Note = null;
             },
             //Item index stuff
             FindItemIndex: function (id) {
-                return this.$data.Items.findIndex(x => x.EventId == id);
+                return this.Items.findIndex(x => x.EventId == id);
             },
             IsDateValid(dateString) {
                 return moment(dateString, JSDate, true).isValid();
@@ -588,23 +593,23 @@
             },
             //order methods
             OrderByClicked: function (orderBy) {
-                if (this.$data.Loading) return;
-                this.$data.Loading = true; //prevent click spamming
+                if (this.Loading) return;
+                this.Loading = true; //prevent click spamming
                 //Flip order by
-                if (this.$data.OrderBy == orderBy) {
-                    this.$data.OrderAsc = !this.$data.OrderAsc;
+                if (this.OrderBy == orderBy) {
+                    this.OrderAsc = !this.OrderAsc;
                 }
                 else {
                     //Order this column
-                    this.$data.OrderBy = orderBy;
-                    this.$data.OrderAsc = true;
+                    this.OrderBy = orderBy;
+                    this.OrderAsc = true;
                 }
                 this.LoadItems(this.GetCurrentItemsAPI);
             },
             OrderState: function (orderBy) {
                 //console.log(orderBy);
-                if (orderBy == this.$data.OrderBy) {
-                    if (this.$data.OrderAsc)
+                if (orderBy == this.OrderBy) {
+                    if (this.OrderAsc)
                         return '&utrif;';
                     return '&dtrif;';
                 }
@@ -614,14 +619,14 @@
                 this.LoadItems(this.GetCurrentItemsAPI);
             },
             PageNavClicked: function (page) {
-                if (this.$data.Loading) return;
-                this.$data.Loading = true;
-                this.$data.OnPage = page;
+                if (this.Loading) return;
+                this.Loading = true;
+                this.OnPage = page;
                 this.LoadItems(this.GetCurrentItemsAPI);
             },
             UpdatePagination: function (totalPages, totalRows) {
-                this.$data.TotalPages = totalPages;
-                this.$data.TotalRows = totalRows;
+                this.TotalPages = totalPages;
+                this.TotalRows = totalRows;
             },
         }
     }

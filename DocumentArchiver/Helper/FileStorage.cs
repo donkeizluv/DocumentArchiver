@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 
 namespace DocumentArchiver.Helper
@@ -42,39 +44,41 @@ namespace DocumentArchiver.Helper
                 return false;
             }
         }
-        public static bool GetUpload(string fileName, string folderPath, out FileStream stream)
-        {
-            stream = null;
-            try
-            {
-                var fullPath = new FileInfo(Path.Combine(folderPath, fileName));
-                stream = fullPath.OpenRead();
-                return true;
-            }
-            catch (FileNotFoundException ex)
-            {
-                Utility.LogException(ex, _logger);
-                return false;
-            }
-            catch (IOException ex)
-            {
-                Utility.LogException(ex, _logger);
-                return false;
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Utility.LogException(ex, _logger);
-                return false;
-            }
 
-        }
-        public static bool GetUpload(string fileName, string folderPath, out byte[] bytesArr)
+        public static async Task<MemoryStream> CreateZipStream(IEnumerable<KeyValuePair<string, string>> fileList, string folder, CompressionLevel level = CompressionLevel.Fastest)
         {
-            bytesArr = null;
+            var stream = new MemoryStream();
+            var archive = new ZipArchive(stream, ZipArchiveMode.Create, true);
+
+            foreach (var file in fileList)
+            {
+                var fileName = file.Value;
+                if (!GetUpload(file.Key, folder, out var contentStream))
+                {
+                    _logger.Error($"Cant find {file.Key} to zip");
+                    return null;
+                }
+                var zipArchiveEntry = archive.CreateEntry(fileName, level);
+                using (contentStream)
+                {
+                    var read = new byte[contentStream.Length];
+                    await contentStream.ReadAsync(read, 0, (int)contentStream.Length);
+                    using (var entryStream = zipArchiveEntry.Open())
+                    {
+                        entryStream.Write(read, 0, read.Length);
+                    }
+                }
+            }
+            stream.Position = 0;
+            return stream;
+        }
+        public static bool GetUpload(string fileName, string folderPath, out FileStream fileStream)
+        {
+            fileStream = null;
             try
             {
                 var fullPath = new FileInfo(Path.Combine(folderPath, fileName));
-                bytesArr = File.ReadAllBytes(fullPath.FullName);
+                fileStream = fullPath.OpenRead();
                 return true;
             }
             catch (FileNotFoundException ex)

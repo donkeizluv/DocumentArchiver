@@ -3,11 +3,13 @@ import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import VModal from 'vue-js-modal'
 import Toasted from 'vue-toasted'
+//import VueProgressBar from 'vue-progressbar'
+
 
 import CaseListingView from './Component/CaseListingView.vue'
-import appConst from '../Home/AppConst'
+import appConst from './AppConst'
 //import mixin from '../Home/mixin'
-import store from '../Home/vuex'
+import store from './vuex'
 
 Vue.use(Vuex)
 //Init router
@@ -30,6 +32,11 @@ Vue.use(Toasted,
         theme: 'primary',
         iconPack: 'fontawesome'
     });
+//Vue.use(VueProgressBar, {
+//    color: 'rgb(143, 255, 199)',
+//    failedColor: 'red',
+//    height: '2px'
+//})
 //Registers globally
 //Vue.mixin(mixin);
 //Init

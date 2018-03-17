@@ -1,13 +1,14 @@
 <template id="listing-template">
     <div>
         <!--Modals-->
-        <!--<modal name="m-app-error" v-bind:clickToClose=false>
-    </modal>-->
+            <!--<modal name="m-app-error" v-bind:clickToClose=false>
+        </modal>-->
         <v-dialog :clickToClose=false />
         <!--End modals-->
         <div class="row top-margin">
             <div class="col-sm-8 mx-auto">
                 <search-bar v-bind:isdisabled="IsLoading"
+                            v-bind:value-pairs="SearchBarValues"
                             v-on:submit="SearchButtonClicked"></search-bar>
             </div>
         </div>
@@ -64,26 +65,23 @@
                                             </span>
                                         </button>
                                     </td>
-                                    <!--<td>
-                                    <span class="table-cell-content">{{item.ContractId}}</span>
-                                </td>-->
                                     <td>
-                                        <span class="table-cell-content">{{item.ContractNumber}}</span>
+                                        <span>{{item.ContractNumber}}</span>
                                     </td>
                                     <td>
-                                        <span class="table-cell-content">{{item.CustomerName}}</span>
+                                        <span>{{item.CustomerName}}</span>
                                     </td>
                                     <td>
-                                        <span class="table-cell-content">{{item.IdentityCard}}</span>
+                                        <span>{{item.IdentityCard}}</span>
                                     </td>
                                     <td>
-                                        <span class="table-cell-content">{{item.Phone}}</span>
+                                        <span>{{item.Phone}}</span>
                                     </td>
                                     <td>
-                                        <span class="table-cell-content">{{item.CreateTimeString}}</span>
+                                        <span>{{item.CreateTimeString}}</span>
                                     </td>
                                     <td>
-                                        <span class="table-cell-content">{{item.Username}}</span>
+                                        <span>{{item.Username}}</span>
                                     </td>
                                 </tr>
                                 <!--@*expandable details*@-->
@@ -192,10 +190,10 @@
     </div>
 </template>
 <script>
-    import axios from 'axios'    
+    import axios from 'axios'
     import common from '../Common'
-    import searchBar from '../Component/SearchBar.vue'
-    import eventDetails from '../Component/EventDetails.vue'
+    import searchBar from '../../Shared/SearchBar.vue'
+    import eventDetails from './EventDetails.vue'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
     import appConst from '../AppConst'
@@ -221,24 +219,27 @@
             'search-bar': searchBar,
             'event-details': eventDetails
         },
-        mounted: function () {
+        //mounted: function () {
+        //    //this.Init();
+        //},
+        created: function () {
             this.Init();
         },
         watch: {
             '$route'(to, from) {
-                this.$data.OnPage = to.query.page;
-                this.$data.FilterBy = to.query.type;
-                this.$data.FilterString = to.query.contain
-                this.$data.OrderBy = to.query.order;
-                this.$data.OrderAsc = to.query.asc
+                this.OnPage = to.query.page;
+                this.FilterBy = to.query.type;
+                this.FilterString = to.query.contain
+                this.OrderBy = to.query.order;
+                this.OrderAsc = to.query.asc
                 this.LoadItems(this.GetCurrentItemsAPI);
             },
             '$data.NewItem.ContractNumber'(to, from) {
                 //Clear values when ContractNumber changes
-                this.$data.NewItem.CustomerName = null;
-                this.$data.NewItem.Phone = null;
-                this.$data.NewItem.IdentityCard = null;
-                this.$data.IsNewCaseValid = false;
+                this.NewItem.CustomerName = null;
+                this.NewItem.Phone = null;
+                this.NewItem.IdentityCard = null;
+                this.IsNewCaseValid = false;
             },
         },
         data: function () {
@@ -265,7 +266,9 @@
                     CustomerName: null,
                     IdentityCard: null,
                     Phone: null
-                }
+                },
+                //Search bar value pairs
+                SearchBarValues: appConst.SearchBarValues
             };
         },
         computed: {
@@ -273,22 +276,22 @@
                 return this.$store.getters.CanCreate;
             },
             GetCurrentItemsAPI: function () {
-                return appConst.ContractListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.$data.OnPage));
+                return appConst.ContractListingAPI + queryBuilder.stringify(this.ComposeCurrentItemsQuery(this.OnPage));
             },
             CanSaveNewItem: function () {
-                return this.$data.IsNewCaseValid;
+                return this.IsNewCaseValid;
             },
             CanCheck: function () {
                 //No special chars in contract number
                 var format = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
-                if (this.$data.NewItem.ContractNumber) {
-                    if (!format.test(this.$data.NewItem.ContractNumber))
+                if (this.NewItem.ContractNumber) {
+                    if (!format.test(this.NewItem.ContractNumber))
                         return true;
                 }
                 return false;
             },
             IsLoading: function () {
-                return this.$data.Loading;
+                return this.Loading;
             }
         },
         methods: {
@@ -309,12 +312,12 @@
                 this.$store.commit(appConst.LayerName, model.Claims[appConst.LayerName]);
                 this.$store.commit(appConst.LayerRank, model.Claims[appConst.LayerRank]);
 
-                this.$data.FilterBy = model.FilterBy;
-                this.$data.FilterString = model.FilterString;
-                this.$data.OnPage = model.OnPage;
-                this.$data.OrderBy = model.OrderBy;
-                this.$data.OrderAsc = model.OrderAsc;
-                this.$data.Items = model.Items;
+                this.FilterBy = model.FilterBy;
+                this.FilterString = model.FilterString;
+                this.OnPage = model.OnPage;
+                this.OrderBy = model.OrderBy;
+                this.OrderAsc = model.OrderAsc;
+                this.Items = model.Items;
                 this.UpdatePagination(model.TotalPages, model.TotalRows);
             },
             LoadItems: function (url) {
@@ -331,10 +334,10 @@
                             window.location.href = response.headers.login;
                         }
                         //that.$data.RequestListingModel = response.data;
-                        that.$data.Items = response.data.Items;
+                        that.Items = response.data.Items;
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
                         that.SetLoadingState(false);
-                        that.$data.ShowingEventDetails = []; //Reset shown details
+                        that.ShowingEventDetails = []; //Reset shown details
                         //Re-render
                         //that.$forceUpdate();
                     })
@@ -368,23 +371,23 @@
             },
             //update paging
             UpdatePagination: function (totalPages, totalRows) {
-                this.$data.TotalPages = totalPages;
-                this.$data.TotalRows = totalRows;
+                this.TotalPages = totalPages;
+                this.TotalRows = totalRows;
             },
             //Page number clicked handler
             PageNavClicked: function (page) {
                 ////router.push({ path: `${page}/${type}/${contains}` })
                 if (this.IsLoading) return;
                 this.SetLoadingState(true);
-                this.$data.OnPage = page;
+                this.OnPage = page;
                 this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(page) });
             },
             //Search button click handler
             SearchButtonClicked: function (searchModel) {
                 //back to page 1 on search
-                this.$data.FilterBy = searchModel.FilterBy;
-                this.$data.FilterString = searchModel.FilterString;
-                this.$data.OnPage = 1;
+                this.FilterBy = searchModel.FilterBy;
+                this.FilterString = searchModel.FilterString;
+                this.OnPage = 1;
                 //this will trigger route watch
                 this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(1) });
 
@@ -393,26 +396,26 @@
             ComposeCurrentItemsQuery: function (pageNumber) {
                 return {
                     page: pageNumber,
-                    type: this.$data.FilterBy,
-                    contain: this.$data.FilterString,
-                    order: this.$data.OrderBy,
-                    asc: this.$data.OrderAsc,
+                    type: this.FilterBy,
+                    contain: this.FilterString,
+                    order: this.OrderBy,
+                    asc: this.OrderAsc,
                 };
             },
             //CRUD
             ClearNewItem: function () {
-                this.$data.NewItem.ContractNumber = null;
-                this.$data.NewItem.CustomerName = null;
-                this.$data.NewItem.Phone = null;
-                this.$data.NewItem.IdentityCard = null;
-                this.$data.IsNewCaseValid = false;
+                this.NewItem.ContractNumber = null;
+                this.NewItem.CustomerName = null;
+                this.NewItem.Phone = null;
+                this.NewItem.IdentityCard = null;
+                this.IsNewCaseValid = false;
             },
             //Check before submit new item
             CheckContract: function () {
                 var url = appConst.CheckContractAPI;
                 var that = this;
                 var formData = new FormData();
-                formData.append('contractNumber', this.$data.NewItem.ContractNumber);
+                formData.append('contractNumber', this.NewItem.ContractNumber);
                 //console.log(formData);
 
                 axios.post(url, formData)
@@ -426,8 +429,8 @@
                         if (response.data.Valid) {
                             //Check OK
                             that.ShowSuccessToast(CheckContractOK);
-                            that.$data.IsNewCaseValid = true;
-                            that.$data.NewItem = response.data.Data;
+                            that.IsNewCaseValid = true;
+                            that.NewItem = response.data.Data;
                         }
                         else {
                             //Not OK
@@ -443,7 +446,7 @@
                 var url = appConst.CreateContractAPI;
                 var that = this;
                 var formData = new FormData();
-                formData.append('contractNumber', this.$data.NewItem.ContractNumber);
+                formData.append('contractNumber', this.NewItem.ContractNumber);
                 //console.log(formData);
 
                 axios.post(url, formData)
@@ -472,7 +475,7 @@
             //    this.IsLoading = false;
             //},
             IsShowingEventDetails: function (id) {
-                var index = this.$data.ShowingEventDetails.indexOf(id);
+                var index = this.ShowingEventDetails.indexOf(id);
                 if (index != -1) {
                     return true;
                 }
@@ -480,11 +483,11 @@
             },
             ToggleEventDetails: function (id) {
                 if (this.IsLoading) return;
-                var index = this.$data.ShowingEventDetails.indexOf(id);
+                var index = this.ShowingEventDetails.indexOf(id);
                 if (index == -1) {
                     //shows
                     this.HideDetails(id);
-                    this.$data.ShowingEventDetails.push(id);
+                    this.ShowingEventDetails.push(id);
                     this.SetLoadingState(true);
                     //Broadcast events
                     this.$emit(PopulateDetail, id);
@@ -497,33 +500,33 @@
             },
             HideDetails: function (id) {
                 //hide event details
-                var index = this.$data.ShowingEventDetails.indexOf(id);
+                var index = this.ShowingEventDetails.indexOf(id);
                 if (index != -1) {
-                    this.$data.ShowingEventDetails.splice(index, 1);
+                    this.ShowingEventDetails.splice(index, 1);
                 }
             },
             CollapseAll: function () {
-                while (this.$data.ShowingEventDetails.length > 0) { this.$data.ShowingEventDetails.pop(); }
+                while (this.ShowingEventDetails.length > 0) { this.ShowingEventDetails.pop(); }
             },
             //order methods
             OrderByClicked: function (orderBy) {
                 if (this.IsLoading) return;
                 this.SetLoadingState(true); //prevent click spamming
                 //Flip order by
-                if (this.$data.OrderBy == orderBy) {
-                    this.$data.OrderAsc = !this.$data.OrderAsc;
+                if (this.OrderBy == orderBy) {
+                    this.OrderAsc = !this.OrderAsc;
                 }
                 else {
                     //Order this column
-                    this.$data.OrderBy = orderBy;
-                    this.$data.OrderAsc = true;
+                    this.OrderBy = orderBy;
+                    this.OrderAsc = true;
                 }
                 this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(1) });
             },
             OrderState: function (orderBy) {
                 //console.log(orderBy);
-                if (orderBy == this.$data.OrderBy) {
-                    if (this.$data.OrderAsc)
+                if (orderBy == this.OrderBy) {
+                    if (this.OrderAsc)
                         return '&utrif;';
                     return '&dtrif;';
                 }
@@ -533,7 +536,7 @@
                 this.LoadItems(this.GetCurrentItemsAPI);
             },
             SetLoadingState(state) {
-                this.$data.Loading = state;
+                this.Loading = state;
             }
         }
     };

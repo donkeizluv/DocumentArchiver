@@ -100,11 +100,11 @@ namespace DocumentArchiver.Controllers
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                 var eventLog = await _context.EventLog.SingleOrDefaultAsync(e => e.EventId == eventId);
                 if (eventLog == null) return BadRequest("Cant find EventLog");
-                if(!FileStorage.GetUpload(eventLog.Guid, Path.Combine(Program.ExeDir, PathUploadPath), out FileStream stream))
+                if(!FileStorage.GetUpload(eventLog.Guid, Path.Combine(Program.ExeDir, PathUploadPath), out var contentStream))
                 {
                     return NoContent();
                 }
-                return File(stream, System.Net.Mime.MediaTypeNames.Application.Octet, eventLog.Filename);
+                return File(contentStream, System.Net.Mime.MediaTypeNames.Application.Octet, eventLog.Filename);
             }
         }
         [HttpGet]
@@ -119,28 +119,11 @@ namespace DocumentArchiver.Controllers
                 _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
                 var q = _context.Contract.Where(c => c.ContractId == contractId).Include(c => c.EventLog);
                 var contract = await q.SingleOrDefaultAsync();
-                if (contract == null) return BadRequest("Cant find Contrcat");
+                if (contract == null) return BadRequest("Cant find contract");
 
                 var files = contract.EventLog.Select(e => new KeyValuePair<string, string>(e.Guid, $"{e.EventId}_{e.Filename}"));
-                var stream = new MemoryStream();
-                var archive = new ZipArchive(stream, ZipArchiveMode.Create, true);
-
-                foreach (var file in files)
-                {
-                    var fileName = file.Value;
-                    if (!FileStorage.GetUpload(file.Key, Path.Combine(Program.ExeDir, PathUploadPath), out byte[] bytes))
-                    {
-                        _logger.Error($"Cant find {file.Key} to zip");
-                        return NoContent();
-                    }
-                    var zipArchiveEntry = archive.CreateEntry(fileName, CompressionLevel.Fastest);
-                    using (var zipStream = zipArchiveEntry.Open())
-                    {
-                        zipStream.Write(bytes, 0, bytes.Length);
-                        bytes = null;
-                    }
-                }
-                stream.Position = 0;
+                var stream = await FileStorage.CreateZipStream(files, Path.Combine(Program.ExeDir, PathUploadPath));
+                if (stream == null) return BadRequest();
                 return File(stream, System.Net.Mime.MediaTypeNames.Application.Zip,
                     $"{contract.ContractNumber}_{DateTime.Today.ToString(AppConst.OnlyNumberDate)}.zip");
             }
