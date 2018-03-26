@@ -14,7 +14,7 @@
         </div>
         <div class="row top-margin">
             <div class="col-12">
-                <div class="table-responsive">
+                <div class="table-responsive text-center">
                     <table class="table table-hover">
                         <thead>
                             <tr>
@@ -173,9 +173,9 @@
             <div class="col-lg-6 mx-auto">
                 <page-nav :page-count="TotalPages"
                           :click-handler="PageNavClicked"
+                          ref="casepaginate"
                           :page-range="2"
                           :prev-text="'Trước'"
-                          :force-page="OnPage - 1"
                           :next-text="'Sau'"
                           :page-class="'page-item'"
                           :page-link-class="'page-link'"
@@ -192,12 +192,13 @@
 <script>
     import axios from 'axios'
     import common from '../Common'
-    import searchBar from '../../Shared/SearchBar.vue'
+    import searchBar from './SearchBar.vue'
     import eventDetails from './EventDetails.vue'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
     import appConst from '../AppConst'
 
+    import { SET_ABILITY, SET_LAYER, SET_LAYERRANK } from '../actions'
     const errorModal = 'm-app-error';
     //Events
     const PopulateDetail = 'populatedetails';
@@ -227,12 +228,17 @@
         },
         watch: {
             '$route'(to, from) {
-                this.OnPage = to.query.page;
-                this.FilterBy = to.query.type;
-                this.FilterString = to.query.contain
-                this.OrderBy = to.query.order;
-                this.OrderAsc = to.query.asc
+                var page = to.query.page || 1;
+                if (page < 1) page = 1;
+                this.OnPage = page;
+                this.FilterBy = to.query.type || '',
+                this.FilterString = to.query.contain || '',
+                this.OrderBy = to.query.order || '',
+                this.OrderAsc = to.query.asc || true,
                 this.LoadItems(this.GetCurrentItemsAPI);
+                //Sync page number with nav control
+                //0 based
+                this.$refs.casepaginate.selected = this.OnPage - 1;
             },
             '$data.NewItem.ContractNumber'(to, from) {
                 //Clear values when ContractNumber changes
@@ -251,7 +257,6 @@
                 FilterString: '',
                 OrderBy: '',
                 OrderAsc: true,
-                //Injected: null,
                 Items: [],
                 TotalRows: 0,
                 TotalPages: 0,
@@ -297,28 +302,20 @@
         methods: {
             //init app
             Init: function () {
-                //Load injected
-                var model = window.model;
-                if (!model || !model.Claims) {
-                   //Show app init failed
-                    this.ShowErrorDialog(GeneralError);
-                    return;
-                }
-                //console.log(model);
-                //this.$data.Injected = model;
-                //this.$data.Claims = model.Claims;
-                //Commit to store
-                this.$store.commit(appConst.Ability, model.Claims[appConst.Ability]);
-                this.$store.commit(appConst.LayerName, model.Claims[appConst.LayerName]);
-                this.$store.commit(appConst.LayerRank, model.Claims[appConst.LayerRank]);
+                var router = this.$router;
+                var page = router.history.current.query.page || 1;
+                if (page < 1) page = 1;
+                var type = router.history.current.query.type || '';
+                var contain = router.history.current.query.contain || '';
+                var order = router.history.current.query.order || '';
+                var asc = router.history.current.query.asc || true;
 
-                this.FilterBy = model.FilterBy;
-                this.FilterString = model.FilterString;
-                this.OnPage = model.OnPage;
-                this.OrderBy = model.OrderBy;
-                this.OrderAsc = model.OrderAsc;
-                this.Items = model.Items;
-                this.UpdatePagination(model.TotalPages, model.TotalRows);
+                this.FilterBy = type;
+                this.FilterString = contain;
+                this.OnPage = page;
+                this.OrderBy = order;
+                this.OrderAsc = asc;
+                this.Refresh();
             },
             LoadItems: function (url) {
                 this.SetLoadingState(true);
@@ -327,12 +324,6 @@
                 //console.log(url);
                 axios.get(url)
                     .then(function (response) {
-                        //console.log(response);
-                        //console.log(response.headers.login);
-                        if (response.headers.login) {
-                            //Login expired -> Redirect
-                            window.location.href = response.headers.login;
-                        }
                         //that.$data.RequestListingModel = response.data;
                         that.Items = response.data.Items;
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
@@ -380,7 +371,7 @@
                 if (this.IsLoading) return;
                 this.SetLoadingState(true);
                 this.OnPage = page;
-                this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(page) });
+                this.$router.push({ name: 'Home', query: this.ComposeCurrentItemsQuery(page) });
             },
             //Search button click handler
             SearchButtonClicked: function (searchModel) {
@@ -389,7 +380,7 @@
                 this.FilterString = searchModel.FilterString;
                 this.OnPage = 1;
                 //this will trigger route watch
-                this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(1) });
+                this.$router.push({ name: 'Home', query: this.ComposeCurrentItemsQuery(1) });
 
             },
 
@@ -420,12 +411,7 @@
 
                 axios.post(url, formData)
                     .then(function (response) {
-                        console.log(response);
-                        if (response.headers.login) {
-                            //Login expired -> Redirect
-                            window.location.href = response.headers.login;
-                            return;
-                        }
+                        //console.log(response);
                         if (response.data.Valid) {
                             //Check OK
                             that.ShowSuccessToast(CheckContractOK);
@@ -451,12 +437,6 @@
 
                 axios.post(url, formData)
                     .then(function (response) {
-                        console.log(response);
-                        if (response.headers.login) {
-                            //Login expired -> Redirect
-                            window.location.href = response.headers.login;
-                            return;
-                        }
                         if (response.data.Valid) {
                             that.ShowSuccessToast(NewItemCreated);
                             that.ClearNewItem();
@@ -521,7 +501,7 @@
                     this.OrderBy = orderBy;
                     this.OrderAsc = true;
                 }
-                this.$router.push({ name: 'Index', query: this.ComposeCurrentItemsQuery(1) });
+                this.$router.push({ name: 'Home', query: this.ComposeCurrentItemsQuery(1) });
             },
             OrderState: function (orderBy) {
                 //console.log(orderBy);

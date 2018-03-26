@@ -378,9 +378,6 @@
 
                 axios.get(url)
                     .then(function (response) {
-                        if (response.headers.login) {
-                            window.location.href = response.headers.login;
-                        }
                         that.Items = response.data.Items;
                         that.RefreshCopy(); //Clone Items to arr
                         that.UpdatePagination(response.data.TotalPages, response.data.TotalRows);
@@ -419,11 +416,6 @@
                 //this.startProgressBar();
                 axios.post(url, formData, axiosConfig)
                     .then(function (response) {
-                        if (response.headers.login) {
-                            //Login expired -> Redirect
-                            window.location.href = response.headers.login;
-                            return;
-                        }
                         that.$emit(successEvent, 'Thêm sự kiện mới thành công!')
                         that.ClearNewItem();
                         that.Refresh();
@@ -479,11 +471,6 @@
 
                 axios.post(url, formData)
                     .then(function (response) {
-                        if (response.headers.login) {
-                            //Login expired -> Redirect
-                            window.location.href = response.headers.login;
-                            return;
-                        }
                         that.$emit(successEvent, 'Xóa thành công!');
                         that.Refresh();
                     })

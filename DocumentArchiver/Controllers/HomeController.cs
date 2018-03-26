@@ -26,29 +26,10 @@ namespace DocumentArchiver.Controllers
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> Index([FromQuery]int page = 1,
-            [FromQuery]string type = "",
-            [FromQuery]string contain = "",
-            [FromQuery]string order = "",
-            [FromQuery]bool asc = true)
+        [AllowAnonymous]
+        public async Task<IActionResult> Index()
         {
-            using (_context)
-            {
-                _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-                var factory = new ContractVMFactory(_context);
-                var paramBuilder = new ParamBuilder()
-                   .SetPage(page)
-                   .SetType(type).SetContain(contain)
-                   .SetOrderBy(order)
-                   .SetAsc(asc)
-                   .SetHttpContext(HttpContext)
-                   .SetDbContext(_context);
-                var model = await factory.Create(paramBuilder.Build());
-                //Fill claims to init app permission
-                model.Claims = SessionHelper.ClaimsToDict(HttpContext.User.Claims);
-                return View(model);
-            }
+            return await Task.FromResult(View());
         }
 
         public IActionResult Error()

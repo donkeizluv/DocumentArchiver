@@ -1,30 +1,18 @@
 ﻿import Vue from 'vue'
-import Vuex from 'vuex'
-import VueRouter from 'vue-router'
+
 import VModal from 'vue-js-modal'
 import Toasted from 'vue-toasted'
 //import VueProgressBar from 'vue-progressbar'
 
-
-import CaseListingView from './Component/CaseListingView.vue'
 import appConst from './AppConst'
 //import mixin from '../Home/mixin'
-import store from './vuex'
+import store from './store'
+import router from './router'
+import App from './Component/AppRoot.vue'
 
-Vue.use(Vuex)
-//Init router
-var router = new VueRouter({
-    mode: 'history',
-    base: 'Home',
-    //root: window.location.href,
-    routes: [
-        { name: 'Default', path: '/', component: CaseListingView },
-        { name: 'Index', path: '/Index', component: CaseListingView }
-    ]
-});
+
 //Extend & reg
 Vue.use(VModal, { dialog: true });
-Vue.use(VueRouter);
 Vue.use(Toasted,
     {
         duration: 3333,
@@ -42,8 +30,8 @@ Vue.use(Toasted,
 //Init
 new Vue({
     //mixins: [mixin],
-    store: new Vuex.Store(store),
-    el: '#app',
+    store: store,
     router: router,
-    render: h => h(CaseListingView),
+    el: '#app',
+    render: h => h(App)
 });

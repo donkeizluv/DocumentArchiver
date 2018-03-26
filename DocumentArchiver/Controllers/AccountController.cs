@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DocumentArchiver.Helper;
 using DocumentArchiver.EntityModels;
 using DocumentArchiver.Filter;
 using DocumentArchiver.Helper;
@@ -13,7 +14,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using DocumentArchiver.Auth;
 
 namespace DocumentArchiver.Controllers
 {
@@ -26,6 +29,8 @@ namespace DocumentArchiver.Controllers
 
         private DocumentArchiverContext _context;
         private IConfiguration _config;
+        private readonly IJwtFactory _jwtFactory;
+        private readonly JwtIssuerOptions _jwtOptions;
 
         internal string Issuer
         {
@@ -60,10 +65,15 @@ namespace DocumentArchiver.Controllers
             }
         }
 
-        public AccountController(DocumentArchiverContext context, IConfiguration config)
+        public AccountController(DocumentArchiverContext context,
+            IConfiguration config,
+            IJwtFactory jwtFactory,
+            IOptions<JwtIssuerOptions> jwtOptions)
         {
             _context = context;
             _config = config;
+            _jwtFactory = jwtFactory;
+            _jwtOptions = jwtOptions.Value;
         }
 
         public enum LoginResult
@@ -97,42 +107,50 @@ namespace DocumentArchiver.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> DoLogin([FromForm]string userName = "", [FromForm]string pwd = "")
+        public async Task<IActionResult> DoLogin([FromForm]string username = "", [FromForm]string pwd = "")
         {
             using (_context)
             {
                 //clear whatever stored session
                 ClearSession();
-                var loginLevel = GetLoginLevel(userName, pwd, _context, out var user);
-                if (loginLevel == LoginResult.Error) return LoginFail();
-                if (loginLevel == LoginResult.NoPermission) return NoPermission();
-                if (loginLevel == LoginResult.NotActive) return NotActive();
+                var loginLevel = GetLoginLevel(username, pwd, _context, out var user);
+                if (loginLevel == LoginResult.Error) return Unauthorized();
+                if (loginLevel == LoginResult.NoPermission) return Unauthorized();
+                if (loginLevel == LoginResult.NotActive) return Unauthorized();
                 //OK proceed
-             
                 //add claims to identity
                 var userIdentity = new ClaimsIdentity("UserCred");
-                userIdentity.AddClaims(GetClaims(userName, user));
-                //add identity to principal
-                var userPrincipal = new ClaimsPrincipal(userIdentity);
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    userPrincipal,
-                    new AuthenticationProperties
-                    {
-                        ExpiresUtc = DateTime.UtcNow.AddMinutes(45)
-                        //IsPersistent = false,
-                        //AllowRefresh = false
-                    });
-                //Save lastlogin
+                userIdentity.AddClaims(GetUserClaims(user));
+                var jwt = await Token.GenerateJwt(userIdentity,
+                    _jwtFactory,
+                    user.Username,
+                    _jwtOptions,
+                    new JsonSerializerSettings { Formatting = Formatting.Indented });
                 await _context.SaveChangesAsync();
-                return Ok(new { Valid = true, Message = string.Empty });
+                //Return token
+                return new OkObjectResult(jwt);
+
+                //add identity to principal
+                //var userPrincipal = new ClaimsPrincipal(userIdentity);
+                //await HttpContext.SignInAsync(
+                //    CookieAuthenticationDefaults.AuthenticationScheme,
+                //    userPrincipal,
+                //    new AuthenticationProperties
+                //    {
+                //        ExpiresUtc = DateTime.UtcNow.AddMinutes(45)
+                //        //IsPersistent = false,
+                //        //AllowRefresh = false
+                //    });
+                //Save lastlogin
+                //await _context.SaveChangesAsync();
+                //return Ok(new { Valid = true, Message = string.Empty });
             }
         }
-        private List<Claim> GetClaims(string userName, User user)
+        private List<Claim> GetUserClaims(User user)
         {
             var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, userName.ToLower()),
+                    new Claim(ClaimTypes.Name, user.Username.ToLower()),
                     new Claim(AppConst.LayerName, user.LayerName),
                     new Claim(AppConst.LayerRank, user.LayerNameNavigation.Rank.ToString())
                 };
@@ -143,27 +161,14 @@ namespace DocumentArchiver.Controllers
             }
             return claims;
         }
-        private IActionResult LoginFail()
-        {
-            return Ok(new { Valid = false, Message = "Đăng nhập thất bại." });
-        }
-        private IActionResult NoPermission()
-        {
-            return Ok(new { Valid = false, Message = "Không tìm thấy quyền truy cập." });
-        }
-        private IActionResult NotActive()
-        {
-            return Ok(new { Valid = false, Message = "Tài khoản đã bị vô hiệu hóa." });
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> LogOut()
-        {
-            ClearSession();
-            await HttpContext.SignOutAsync();
-            return RedirectToAction("Login", "Account");
-        }
+        //[HttpGet]
+        //[Authorize]
+        //public async Task<IActionResult> LogOut()
+        //{
+        //    ClearSession();
+        //    await HttpContext.SignOutAsync();
+        //    return RedirectToAction("Login", "Account");
+        //}
 
         [HttpGet]
         [AllowAnonymous]

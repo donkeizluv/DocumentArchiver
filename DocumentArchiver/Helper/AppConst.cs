@@ -19,5 +19,9 @@ namespace DocumentArchiver.Helper
         public static readonly string Ability = "Ability";
         public static readonly string LayerName = "LayerName";
         public static readonly string LayerRank = "LayerRank";
+
+        //Tokens
+        public const string Rol = "rol", Id = "id";
+        public const string Token = "t";
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.DirectoryServices.Protocols;
 
-namespace DocumentArchiver.Helper
+namespace DocumentArchiver.Auth
 {
     static public class WindowsAuth
     {
@@ -21,6 +21,8 @@ namespace DocumentArchiver.Helper
         //    bool isValid = InteropAuth.LogonUser(userName, domain, password, 2, 0, ref tokenHandler);
         //    return isValid;
         //}
+
+        //Pretty fast
         public static bool Validate_Principal2(string username, string password, string domain)
         {
             try

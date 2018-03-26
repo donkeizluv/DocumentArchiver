@@ -7,6 +7,7 @@ import UserManager from './Component/UserManager.vue'
 
 //Extend & reg
 Vue.use(VModal, { dialog: true });
+
 Vue.use(Toasted,
     {
         duration: 3333,
@@ -14,6 +15,7 @@ Vue.use(Toasted,
         theme: 'primary',
         iconPack: 'fontawesome'
     });
+
 new Vue({
     el: '#app',
     render: h => h(UserManager)

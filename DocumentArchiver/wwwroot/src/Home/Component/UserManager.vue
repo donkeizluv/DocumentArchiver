@@ -78,7 +78,7 @@
     import axios from 'axios'
     import pagenav from 'vuejs-paginate'
     import queryBuilder from 'query-string'
-    import searchBar from '../../Shared/SearchBar.vue'
+    import searchBar from './SearchBar.vue'
 
     export default {
         name: 'UserManager',
